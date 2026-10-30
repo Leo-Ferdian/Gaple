@@ -1,0 +1,523 @@
+/* style.css: tampilan meja. Warna dikumpulkan di :root supaya mudah diganti. */
+:root {
+  --latar: #14352b;
+  --meja: #1d5a46;
+  --teks: #f3efe3;
+  --teks-redup: #b9c9bf;
+  --kartu: #f7f2e4;
+  --kartu-garis: #2b2b2b;
+  --kartu-titik: #1c1c1c;
+  --punggung: #7a2f35;
+  --punggung-hiasan: #c9a0a4;
+  --aksen: #ffd166;
+  --garis: rgba(255, 255, 255, 0.18);
+  --lebar-tangan: clamp(44px, 11vw, 56px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--latar);
+  color: var(--teks);
+  font:
+    16px/1.4 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px;
+}
+
+/* ---- susunan meja ---- */
+.meja {
+  display: grid;
+  grid-template-columns: minmax(48px, 80px) 1fr minmax(48px, 80px);
+  grid-template-areas:
+    'bar bar bar'
+    '. utara .'
+    'barat tengah timur'
+    'tangan tangan tangan';
+  gap: 8px;
+  min-height: calc(100vh - 16px);
+  grid-template-rows: auto auto 1fr auto;
+  background: var(--meja);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.bar {
+  grid-area: bar;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.markah-dua {
+  display: flex;
+  gap: 16px;
+}
+.markah {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 6px;
+  align-items: baseline;
+}
+.markah .angka {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.markah .batang {
+  grid-column: 1 / -1;
+  height: 4px;
+  background: var(--garis);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.markah .batang span {
+  display: block;
+  height: 100%;
+  background: var(--aksen);
+}
+.info {
+  color: var(--teks-redup);
+  font-size: 14px;
+}
+button {
+  font: inherit;
+}
+.aksi button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--garis);
+  background: transparent;
+  color: var(--teks);
+}
+
+/* ---- lawan ---- */
+.lawan {
+  color: var(--teks-redup);
+  font-size: 13px;
+}
+.utara {
+  grid-area: utara;
+  text-align: center;
+}
+.barat {
+  grid-area: barat;
+}
+.timur {
+  grid-area: timur;
+  text-align: right;
+}
+.kipas {
+  display: flex;
+  justify-content: center;
+}
+.lipatan {
+  width: 20px;
+  margin-left: -8px;
+}
+.lipatan:first-child {
+  margin-left: 0;
+}
+.barat .kipas,
+.timur .kipas {
+  flex-direction: column;
+  align-items: center;
+}
+.barat .lipatan,
+.timur .lipatan {
+  margin-left: 0;
+  margin-top: -26px;
+}
+.barat .lipatan:first-child,
+.timur .lipatan:first-child {
+  margin-top: 0;
+}
+
+/* ---- tengah ---- */
+.tengah {
+  grid-area: tengah;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+.rangkaian {
+  text-align: center;
+}
+.rangkaian.kosong {
+  color: var(--teks-redup);
+}
+.status {
+  margin: 0;
+  color: var(--teks-redup);
+  text-align: center;
+}
+
+/* ---- kartu ---- */
+.kartu {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.kartu .badan {
+  fill: var(--kartu);
+  stroke: var(--kartu-garis);
+  stroke-width: 1.5;
+}
+.kartu .garis {
+  stroke: var(--kartu-garis);
+  stroke-width: 2;
+}
+.kartu .titik {
+  fill: var(--kartu-titik);
+}
+.kartu.punggung .badan {
+  fill: var(--punggung);
+}
+.kartu.punggung .hiasan {
+  fill: none;
+  stroke: var(--punggung-hiasan);
+  stroke-width: 2;
+}
+
+/* ---- tangan Anda ---- */
+.tangan {
+  grid-area: tangan;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: 16px;
+}
+.kartu-tangan {
+  width: var(--lebar-tangan);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.kartu-tangan.legal {
+  transform: translateY(-14px);
+}
+.kartu-tangan.legal .badan {
+  stroke: var(--aksen);
+  stroke-width: 4;
+}
+.kartu-tangan.redup {
+  opacity: 0.45;
+  cursor: default;
+}
+.kartu-tangan:focus-visible {
+  outline: 3px solid var(--aksen);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kartu-tangan {
+    transition: none;
+  }
+}
+
+/* ---- potongan 8: pilihan sisi, ringkasan, status ---- */
+.status .terakhir {
+  display: block;
+  font-size: 14px;
+  opacity: 0.8;
+  min-height: 1.4em;
+}
+.pilih-sisi {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.pilih-sisi button,
+.ringkasan button,
+.meja.selesai button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--aksen);
+  background: transparent;
+  color: var(--teks);
+  cursor: pointer;
+}
+.pilih-sisi button.batal {
+  border-color: var(--garis);
+}
+.ringkasan {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.ringkasan p {
+  margin: 0 0 8px;
+}
+.akhir-partai {
+  font-weight: 700;
+  color: var(--aksen);
+}
+.kartu-tangan.terpilih {
+  transform: translateY(-24px);
+}
+.meja.selesai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+button:focus-visible {
+  outline: 3px solid var(--aksen);
+  outline-offset: 2px;
+}
+
+.pilih-sisi button,
+.ringkasan button {
+  white-space: nowrap;
+}
+.tangan {
+  position: sticky;
+  bottom: 0;
+  background: var(--meja);
+  z-index: 1;
+  padding-bottom: 6px;
+}
+
+/* Layar sempit: tiga lawan sebaris di atas supaya rangkaian memakai seluruh lebar. */
+@media (max-width: 640px) {
+  .meja {
+    grid-template-columns: 1fr 1.4fr 1fr;
+    grid-template-areas:
+      'bar bar bar'
+      'barat utara timur'
+      'tengah tengah tengah'
+      'tangan tangan tangan';
+  }
+  .barat,
+  .timur {
+    text-align: center;
+  }
+  .barat .kipas,
+  .timur .kipas {
+    flex-direction: row;
+  }
+  .barat .lipatan,
+  .timur .lipatan {
+    margin-top: 0;
+    margin-left: -8px;
+  }
+  .barat .lipatan:first-child,
+  .timur .lipatan:first-child {
+    margin-left: 0;
+  }
+  .tengah {
+    justify-content: flex-start;
+  }
+}
+
+/* ---- potongan 9: menu dan layar akhir ---- */
+.layar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px 16px;
+}
+.layar h1,
+.layar h2 {
+  margin: 0;
+}
+.layar .ket {
+  margin: 0;
+  color: var(--teks-redup);
+}
+.layar fieldset {
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  padding: 8px 14px 12px;
+  min-width: min(100%, 320px);
+  text-align: left;
+}
+.layar legend {
+  color: var(--teks-redup);
+  padding: 0 6px;
+}
+.pilihan {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.pilihan.mati {
+  opacity: 0.5;
+  cursor: default;
+}
+.pilihan input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--aksen);
+}
+.pilihan small {
+  color: var(--teks-redup);
+}
+.layar button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid var(--garis);
+  background: transparent;
+  color: var(--teks);
+  cursor: pointer;
+}
+.layar button.utama {
+  border-color: var(--aksen);
+  background: rgba(255, 209, 102, 0.15);
+  font-weight: 700;
+  min-width: 160px;
+}
+.tombol-baris {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.aturan {
+  max-width: 560px;
+  text-align: left;
+  color: var(--teks-redup);
+}
+.aturan summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--teks);
+}
+.aturan li {
+  margin-bottom: 6px;
+}
+.riwayat {
+  text-align: left;
+  color: var(--teks-redup);
+  padding-left: 24px;
+  margin: 0;
+}
+.poin {
+  font-weight: 700;
+  color: var(--aksen);
+  margin: 0;
+}
+.aksi {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---- potongan 10: rangkaian sebagai satu gambar SVG ---- */
+.rangkaian {
+  width: 100%;
+}
+.rangkaian-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 52vh;
+}
+.letak.ujung .badan {
+  stroke: var(--aksen);
+  stroke-width: 5;
+}
+
+/* ---- potongan 19: bantuan hitung (tahap 5) ---- */
+.meja.dengan-bantuan {
+  grid-template-areas:
+    'bar bar bar'
+    '. utara .'
+    'barat tengah timur'
+    'bantuan bantuan bantuan'
+    'tangan tangan tangan';
+  grid-template-rows: auto auto 1fr auto auto;
+}
+.bantuan {
+  grid-area: bantuan;
+  padding: 8px 10px;
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--teks-redup);
+}
+.bantuan .judul {
+  display: block;
+  margin-bottom: 4px;
+}
+.bantuan ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bantuan .angka-sisa {
+  display: inline-block;
+  min-width: 1.2em;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--garis);
+  color: var(--teks);
+  text-align: center;
+}
+.bantuan table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+}
+.bantuan caption {
+  text-align: left;
+  padding-bottom: 2px;
+}
+.bantuan th,
+.bantuan td {
+  padding: 2px 6px;
+  text-align: center;
+}
+.bantuan tbody th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--teks);
+}
+@media (min-width: 641px) {
+  .bantuan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px 32px;
+  }
+  .bantuan table {
+    width: auto;
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,24 @@
+# Pemeriksaan otomatis tiap push dan pull request.
+# Urutannya sama dengan `npm run cek` ditambah gerbang tahap 1.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run aturan
+      - run: npm run format:cek
+      - run: npm test
+      - run: npm run build
+      - run: npm run gerbang

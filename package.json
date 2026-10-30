@@ -1,0 +1,35 @@
+{
+  "name": "gaple",
+  "version": "0.22.0",
+  "description": "Game gaple 2vs2 berbasis web (pertandingan, partai, kocokan)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo": "node demo/potongan-5.ts",
+    "gerbang": "node demo/potongan-6.ts",
+    "demo:ai": "node demo/ai-sedang.ts",
+    "demo:4": "node demo/potongan-4.ts",
+    "demo:3": "node demo/potongan-3.ts",
+    "demo:2": "node demo/potongan-2.ts",
+    "aturan": "node bantu/periksa-aturan.ts",
+    "format": "prettier --write .",
+    "format:cek": "prettier --check .",
+    "cek": "npm run typecheck && npm run aturan && npm run format:cek && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
