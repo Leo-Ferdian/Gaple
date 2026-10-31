@@ -137,6 +137,8 @@ export interface Pengaturan {
   /** Bantuan hitung: panel kartu tersisa dan peluang di meja (tahap 5). */
   readonly bantuan: boolean;
   readonly mode: ModeMain;
+  /** Efek suara (disintesis di peramban). */
+  readonly suara: boolean;
 }
 
 /** State seluruh aplikasi: pengaturan, dan pertandingan (null bila di menu). */
@@ -147,7 +149,13 @@ export interface Aplikasi {
 
 export type Layar = 'menu' | 'meja' | 'partai-selesai' | 'akhir';
 
-export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({ format: FORMAT_BO3, ai: 'mudah', bantuan: false, mode: 'pertandingan' });
+export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({
+  format: FORMAT_BO3,
+  ai: 'mudah',
+  bantuan: false,
+  mode: 'pertandingan',
+  suara: true,
+});
 
 /** Apakah nilai ini mode main yang tersedia? */
 export function adalahMode(nilai: unknown): nilai is ModeMain {
@@ -174,11 +182,13 @@ export function rapikanPengaturan(mentah: unknown): Pengaturan {
   const ai = 'ai' in sumber ? sumber.ai : undefined;
   const bantuan = 'bantuan' in sumber ? sumber.bantuan : undefined;
   const mode = 'mode' in sumber ? sumber.mode : undefined;
+  const suara = 'suara' in sumber ? sumber.suara : undefined;
   return {
     format: adalahFormatTersimpan(format) ? format : PENGATURAN_BAWAAN.format,
     ai: adalahAi(ai) ? ai : PENGATURAN_BAWAAN.ai,
     bantuan: typeof bantuan === 'boolean' ? bantuan : PENGATURAN_BAWAAN.bantuan,
     mode: adalahMode(mode) ? mode : PENGATURAN_BAWAAN.mode,
+    suara: typeof suara === 'boolean' ? suara : PENGATURAN_BAWAAN.suara,
   };
 }
 

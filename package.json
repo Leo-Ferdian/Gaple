@@ -1,6 +1,6 @@
 {
   "name": "gaple",
-  "version": "0.23.3",
+  "version": "0.24.0",
   "description": "Game gaple 2vs2 berbasis web (pertandingan, partai, kocokan)",
   "type": "module",
   "private": true,

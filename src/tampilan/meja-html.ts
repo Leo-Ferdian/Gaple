@@ -36,7 +36,7 @@ function urutkanTangan(tangan: readonly Kartu[]): Kartu[] {
   return [...tangan].sort((x, y) => x.a - y.a || x.b - y.b);
 }
 
-function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, latihan: boolean): string {
+function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, latihan: boolean, suara: boolean): string {
   const batang = (tim: NomorTim): string => {
     const persen = Math.min(100, Math.round((100 * partai.markah[tim]) / BATAS_MARKAH));
     return (
@@ -47,9 +47,10 @@ function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, lat
   };
   return (
     `<header class="bar">` +
-    `<div class="markah-dua" aria-label="Markah, batas ${BATAS_MARKAH}">${batang(0)}${batang(1)}</div>` +
+    `<div class="markah-dua papan" aria-label="Markah, batas ${BATAS_MARKAH}">${batang(0)}${batang(1)}</div>` +
     `<div class="info">${latihan ? 'Latihan · ' : ''}Poin ${partai.poin[0]}-${partai.poin[1]} · Partai ${nomorPartai} · Kocokan ${partai.nomorKocokan}</div>` +
-    `<div class="aksi"><button type="button" data-aksi="jeda">${dijeda ? 'Lanjut' : 'Jeda'}</button><button type="button" data-aksi="menu">Menu</button></div>` +
+    `<div class="aksi"><button type="button" data-aksi="suara" aria-pressed="${suara}">${suara ? 'Suara nyala' : 'Suara mati'}</button>` +
+    `<button type="button" data-aksi="jeda">${dijeda ? 'Lanjut' : 'Jeda'}</button><button type="button" data-aksi="menu">Menu</button></div>` +
     `</header>`
   );
 }
@@ -188,6 +189,8 @@ export interface OpsiMeja {
   readonly latihan?: boolean;
   /** Saran langkah yang sedang ditampilkan (mode Latihan). */
   readonly saran?: Saran | null;
+  /** Efek suara menyala (hanya untuk label tombol). */
+  readonly suara?: boolean;
 }
 
 /** Meja untuk partai berstatus 'berjalan' atau 'ringkasan'. */
@@ -201,6 +204,7 @@ export function htmlMeja(
     bantuan = false,
     latihan = false,
     saran = null,
+    suara = true,
   }: OpsiMeja = {},
 ): string {
   if (partai.kocokan === null) throw new Error('Tidak ada kocokan yang bisa digambar');
@@ -208,7 +212,7 @@ export function htmlMeja(
   const tampilBantuan = (bantuan || latihan) && partai.status === 'berjalan';
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}">` +
-    htmlBar(partai, nomorPartai, dijeda, latihan) +
+    htmlBar(partai, nomorPartai, dijeda, latihan, suara) +
     htmlLawan(kocokan, UTARA, 'utara') +
     htmlLawan(kocokan, BARAT, 'barat') +
     `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian)}` +

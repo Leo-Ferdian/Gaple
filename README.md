@@ -6,7 +6,7 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.23.3-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-257%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.24.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-261%20lolos-brightgreen)
 
 </div>
 
@@ -21,6 +21,7 @@ Anda (Selatan) berpasangan dengan komputer (Utara) melawan Barat dan Timur. Satu
 - **Bantuan hitung:** kartu yang sudah keluar, sisa per angka, dan peluang kartu lawan.
 - **Mode Latihan:** pertandingan biasa dengan Bantuan hitung dan tombol Saran (langkah terbaik menurut AI Sulit).
 - **Rantai kartu rapi:** kartu yang sudah keluar tidak pernah berpindah, belokan siku, balak di sudut berdiri melintang, dan ukuran kartu menyesuaikan layar desktop maupun ponsel.
+- **Tampilan warung malam:** meja beludru di bingkai kayu, papan skor kapur, dan efek suara sintetis (bisa dimatikan).
 - **Pengaturan tersimpan** di peramban.
 
 ## Aturan singkat
@@ -85,6 +86,7 @@ src/
   partai, pertandingan, kocokan          alur permainan
   pelacak, ai-sedang, ai-sulit           pemain komputer
   controller, penyimpanan                jembatan mesin dan tampilan
+  suara                                  efek suara sintetis
   tampilan/                              kartu SVG, meja HTML, tata letak rantai
   main.ts                                satu-satunya yang menyentuh halaman
 bantu/    alat uji (pemeriksa mandiri, gerbang, aturan penulisan)

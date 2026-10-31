@@ -3,6 +3,7 @@
 
 import { AI_TERSEDIA } from '../controller.ts';
 import { BATAS_MARKAH } from '../markah.ts';
+import { svgKartu, ARAH_DATAR } from './kartu-svg.ts';
 import type { Markah } from '../markah.ts';
 import type { Pengaturan } from '../controller.ts';
 import type { Pertandingan } from '../pertandingan.ts';
@@ -60,12 +61,19 @@ const ATURAN = [
 export function htmlMenu(pengaturan: Pengaturan): string {
   return (
     `<div class="meja layar menu">` +
-    `<h1>Gaple 2vs2</h1>` +
+    `<header class="papan-nama">` +
+    `<div class="hias" aria-hidden="true"><span class="hias-kiri">${svgKartu(6, 6, ARAH_DATAR)}</span><span class="hias-kanan">${svgKartu(6, 3, ARAH_DATAR)}</span></div>` +
+    `<h1>Gaple <span class="dua">2vs2</span></h1>` +
     `<p class="ket">Anda dan Utara melawan Barat dan Timur.</p>` +
-    `<fieldset><legend>Mode</legend>${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</fieldset>` +
-    `<fieldset><legend>Format pertandingan</legend>${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</fieldset>` +
-    `<fieldset><legend>Lawan</legend>${radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n))}</fieldset>` +
-    `<fieldset><legend>Bantuan</legend><label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label></fieldset>` +
+    `</header>` +
+    `<div class="pengaturan">` +
+    `<fieldset><legend>Mode</legend><div class="ubin">${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</div></fieldset>` +
+    `<fieldset><legend>Format pertandingan</legend><div class="ubin">${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</div></fieldset>` +
+    `<fieldset><legend>Lawan</legend><div class="ubin">${radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n))}</div></fieldset>` +
+    `<fieldset><legend>Bantuan dan suara</legend>` +
+    `<label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label>` +
+    `<label class="pilihan"><input type="checkbox" name="suara"${pengaturan.suara ? ' checked' : ''}> Efek suara</label></fieldset>` +
+    `</div>` +
     `<button type="button" class="utama" data-aksi="main">Main</button>` +
     `<details class="aturan"><summary>Aturan singkat</summary><ul>${ATURAN.map((a) => `<li>${a}</li>`).join('')}</ul></details>` +
     `</div>`

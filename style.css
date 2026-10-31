@@ -1,17 +1,28 @@
-/* style.css: tampilan meja. Warna dikumpulkan di :root supaya mudah diganti. */
+/* style.css: tampilan meja. Tema "warung malam": meja beludru hijau di bawah lampu, bingkai kayu,
+   papan skor kapur. Warna dikumpulkan di :root supaya mudah diganti. Fokus saat ini: PC;
+   tampilan ponsel masih memakai aturan lama (lihat catatan pengembangan lanjutan di docs/DEVLOG.md). */
 :root {
-  --latar: #14352b;
-  --meja: #1d5a46;
-  --teks: #f3efe3;
-  --teks-redup: #b9c9bf;
-  --kartu: #f7f2e4;
-  --kartu-garis: #2b2b2b;
-  --kartu-titik: #1c1c1c;
-  --punggung: #7a2f35;
-  --punggung-hiasan: #c9a0a4;
-  --aksen: #ffd166;
-  --garis: rgba(255, 255, 255, 0.18);
+  --latar: #17100b;
+  --kayu: #5a3820;
+  --kayu-terang: #7d5230;
+  --kayu-gelap: #2a190d;
+  --meja: #1d4d3c;
+  --meja-tua: #11332a;
+  --papan: #1f2b27;
+  --kapur: #ece8da;
+  --teks: #f1ead8;
+  --teks-redup: #c3b9a2;
+  --kartu: #f3e9cf;
+  --kartu-garis: #3a2f22;
+  --kartu-titik: #1d1712;
+  --punggung: #8c2f2a;
+  --punggung-hiasan: #d9a68f;
+  --aksen: #f2b84b;
+  --aksen-tua: #b9822a;
+  --garis: rgba(241, 234, 216, 0.2);
   --lebar-tangan: clamp(44px, 11vw, 56px);
+  --slab: Rockwell, 'Roboto Slab', 'Rockwell Nova', 'Hoefler Text', Georgia, serif;
+  --tekstur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 
 * {
@@ -20,96 +31,144 @@
 
 body {
   margin: 0;
-  background: var(--latar);
+  min-height: 100vh;
   color: var(--teks);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(242, 184, 75, 0.2), transparent 70%),
+    repeating-linear-gradient(90deg, #1d130c 0 6px, #22170e 6px 13px, #1a110a 13px 17px), var(--latar);
   font:
-    16px/1.4 system-ui,
+    16px/1.45 system-ui,
     -apple-system,
     'Segoe UI',
     sans-serif;
 }
 
 #app {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 8px;
+  padding: 14px;
 }
 
-/* ---- susunan meja ---- */
+/* ---- susunan meja: felt di dalam bingkai kayu ---- */
 .meja {
   display: grid;
-  grid-template-columns: minmax(48px, 80px) 1fr minmax(48px, 80px);
+  grid-template-columns: minmax(48px, 90px) 1fr minmax(48px, 90px);
   grid-template-areas:
     'bar bar bar'
     '. utara .'
     'barat tengah timur'
     'tangan tangan tangan';
-  gap: 8px;
-  min-height: calc(100vh - 16px);
+  gap: 10px;
+  min-height: calc(100vh - 28px);
   grid-template-rows: auto auto 1fr auto;
-  background: var(--meja);
-  border-radius: 12px;
-  padding: 8px;
+  padding: 14px;
+  border: 14px solid var(--kayu);
+  border-image: linear-gradient(135deg, var(--kayu-terang), var(--kayu) 40%, var(--kayu-gelap)) 1;
+  border-radius: 4px;
+  background: var(--tekstur), radial-gradient(ellipse 80% 70% at 50% 35%, var(--meja), var(--meja-tua) 95%);
+  background-blend-mode: soft-light, normal;
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, 0.55),
+    0 18px 50px rgba(0, 0, 0, 0.6);
 }
 
+/* ---- bar: papan skor kapur ---- */
 .bar {
   grid-area: bar;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  border: 1px solid var(--garis);
-  border-radius: 8px;
-  padding: 6px 10px;
-}
-.markah-dua {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   gap: 16px;
+  align-items: center;
+}
+.papan {
+  display: flex;
+  gap: 22px;
+  padding: 8px 18px 6px;
+  background: var(--tekstur), var(--papan);
+  background-blend-mode: soft-light, normal;
+  border: 5px solid var(--kayu-terang);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 14px rgba(0, 0, 0, 0.6),
+    0 3px 0 var(--kayu-gelap);
 }
 .markah {
   display: grid;
   grid-template-columns: auto auto;
-  gap: 0 6px;
+  gap: 0 10px;
   align-items: baseline;
+  min-width: 96px;
+}
+.markah .nama {
+  font-family: var(--slab);
+  font-style: italic;
+  color: rgba(236, 232, 218, 0.75);
 }
 .markah .angka {
+  justify-self: end;
+  font-family: var(--slab);
   font-weight: 700;
+  font-size: 1.9rem;
+  line-height: 1.1;
+  color: var(--kapur);
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 6px rgba(236, 232, 218, 0.25);
 }
 .markah .batang {
   grid-column: 1 / -1;
-  height: 4px;
-  background: var(--garis);
-  border-radius: 2px;
-  overflow: hidden;
+  height: 0;
+  border-top: 3px dashed rgba(236, 232, 218, 0.18);
+  position: relative;
 }
 .markah .batang span {
-  display: block;
-  height: 100%;
-  background: var(--aksen);
+  position: absolute;
+  left: 0;
+  top: -3px;
+  height: 0;
+  border-top: 3px solid var(--kapur);
+  opacity: 0.85;
 }
 .info {
+  justify-self: center;
+  padding: 4px 14px;
+  font-family: var(--slab);
+  font-size: 0.9rem;
   color: var(--teks-redup);
-  font-size: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
 }
 button {
   font: inherit;
 }
 .aksi button {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid var(--garis);
-  background: transparent;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid var(--kayu-gelap);
+  border-bottom-width: 3px;
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
   color: var(--teks);
+  cursor: pointer;
+}
+.aksi button:hover {
+  filter: brightness(1.12);
+}
+.aksi button:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+.aksi button[aria-pressed='false'] {
+  opacity: 0.65;
 }
 
 /* ---- lawan ---- */
 .lawan {
   color: var(--teks-redup);
+  font-family: var(--slab);
   font-size: 13px;
+}
+.lawan .kartu {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
 }
 .utara {
   grid-area: utara;
@@ -165,8 +224,11 @@ button {
 }
 .status {
   margin: 0;
-  color: var(--teks-redup);
+  color: var(--teks);
+  font-family: var(--slab);
+  font-size: 1.05rem;
   text-align: center;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 /* ---- kartu ---- */
@@ -179,6 +241,10 @@ button {
   fill: var(--kartu);
   stroke: var(--kartu-garis);
   stroke-width: 1.5;
+}
+.letak .kartu,
+.kartu-tangan .kartu {
+  filter: drop-shadow(0 2px 2.5px rgba(0, 0, 0, 0.55));
 }
 .kartu .garis {
   stroke: var(--kartu-garis);
@@ -194,6 +260,7 @@ button {
   fill: none;
   stroke: var(--punggung-hiasan);
   stroke-width: 2;
+  stroke-dasharray: 5 3;
 }
 
 /* ---- tangan Anda ---- */
@@ -216,12 +283,19 @@ button {
 .kartu-tangan.legal {
   transform: translateY(-14px);
 }
+.kartu-tangan.legal:hover {
+  transform: translateY(-22px);
+}
+.kartu-tangan.legal .kartu {
+  filter: drop-shadow(0 0 7px rgba(242, 184, 75, 0.65)) drop-shadow(0 2px 2.5px rgba(0, 0, 0, 0.55));
+}
 .kartu-tangan.legal .badan {
   stroke: var(--aksen);
   stroke-width: 4;
 }
 .kartu-tangan.redup {
-  opacity: 0.45;
+  opacity: 0.5;
+  filter: saturate(0.6);
   cursor: default;
 }
 .kartu-tangan:focus-visible {
@@ -243,31 +317,59 @@ button {
   opacity: 0.8;
   min-height: 1.4em;
 }
+.pilih-sisi button,
+.ringkasan button,
+.meja.selesai button,
+.layar button.utama,
+.saran-baris button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid var(--aksen-tua);
+  border-bottom-width: 4px;
+  background: linear-gradient(#f7c767, var(--aksen));
+  color: var(--kayu-gelap);
+  font-family: var(--slab);
+  font-weight: 700;
+  cursor: pointer;
+}
+.pilih-sisi button:hover,
+.ringkasan button:hover,
+.layar button.utama:hover,
+.saran-baris button:hover {
+  filter: brightness(1.08);
+}
+.pilih-sisi button:active,
+.ringkasan button:active,
+.layar button.utama:active,
+.saran-baris button:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+}
+.pilih-sisi button.batal {
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
+  border-color: var(--kayu-gelap);
+  color: var(--teks);
+  font-weight: 400;
+}
 .pilih-sisi {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
 }
-.pilih-sisi button,
-.ringkasan button,
-.meja.selesai button {
-  min-height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
-  border: 1px solid var(--aksen);
-  background: transparent;
-  color: var(--teks);
-  cursor: pointer;
-}
-.pilih-sisi button.batal {
-  border-color: var(--garis);
-}
 .ringkasan {
   text-align: center;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: var(--tekstur), var(--papan);
+  background-blend-mode: soft-light, normal;
+  border: 5px solid var(--kayu-terang);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 14px rgba(0, 0, 0, 0.6),
+    0 3px 0 var(--kayu-gelap);
+  padding: 14px 22px 16px;
+  color: var(--kapur);
+  font-family: var(--slab);
 }
 .ringkasan p {
   margin: 0 0 8px;
@@ -298,7 +400,7 @@ button:focus-visible {
 .tangan {
   position: sticky;
   bottom: 0;
-  background: var(--meja);
+  background: linear-gradient(rgba(17, 51, 42, 0), rgba(17, 51, 42, 0.94) 38%);
   z-index: 1;
   padding-bottom: 6px;
 }
@@ -335,34 +437,108 @@ button:focus-visible {
   }
 }
 
-/* ---- potongan 9: menu dan layar akhir ---- */
+/* ---- menu dan layar akhir ---- */
 .layar {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 18px;
   text-align: center;
-  padding: 24px 16px;
+  padding: 28px 24px;
 }
 .layar h1,
 .layar h2 {
   margin: 0;
+  font-family: var(--slab);
 }
 .layar .ket {
   margin: 0;
   color: var(--teks-redup);
+  font-family: var(--slab);
+  font-style: italic;
+}
+
+/* papan nama: papan kayu dengan dua kartu balak miring */
+.papan-nama {
+  position: relative;
+  width: min(100%, 560px);
+  padding: 26px 24px 20px;
+  background: var(--tekstur), repeating-linear-gradient(0deg, var(--kayu) 0 7px, #55341d 7px 8px, var(--kayu) 8px 15px);
+  background-blend-mode: soft-light, normal;
+  border: 4px solid var(--kayu-gelap);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0 3px var(--kayu-terang),
+    0 10px 24px rgba(0, 0, 0, 0.55);
+}
+.papan-nama h1 {
+  font-size: clamp(2.6rem, 6vw, 3.8rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #f6e7c1;
+  text-shadow:
+    0 2px 0 var(--kayu-gelap),
+    0 0 18px rgba(242, 184, 75, 0.35);
+}
+.papan-nama .dua {
+  font-size: 0.5em;
+  font-style: italic;
+  color: var(--aksen);
+  vertical-align: 0.35em;
+}
+.papan-nama .ket {
+  margin-top: 8px;
+  color: #e6d3a8;
+}
+.hias {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hias span {
+  position: absolute;
+  width: 74px;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.6));
+}
+.hias-kiri {
+  left: -30px;
+  top: -22px;
+  transform: rotate(-16deg);
+}
+.hias-kanan {
+  right: -30px;
+  bottom: -22px;
+  transform: rotate(12deg);
+}
+
+/* pilihan: satu baris ubin per kelompok */
+.pengaturan {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: min(100%, 700px);
 }
 .layar fieldset {
-  border: 1px solid var(--garis);
-  border-radius: 8px;
-  padding: 8px 14px 12px;
-  min-width: min(100%, 320px);
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 12px 12px;
+  min-width: 0;
   text-align: left;
+  background: rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 0 0 1px var(--garis);
 }
 .layar legend {
-  color: var(--teks-redup);
   padding: 0 6px;
+  font-family: var(--slab);
+  font-weight: 700;
+  color: var(--aksen);
+}
+.ubin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .pilihan {
   display: flex;
@@ -383,38 +559,75 @@ button:focus-visible {
 .pilihan small {
   color: var(--teks-redup);
 }
+/* radio tampil sebagai ubin kayu; yang terpilih menyala seperti kartu legal */
+.ubin .pilihan {
+  flex-wrap: wrap;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--kayu-gelap);
+  border-bottom-width: 3px;
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
+  transition: transform 0.1s;
+}
+.ubin .pilihan input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.ubin .pilihan:hover:not(.mati) {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.ubin .pilihan:has(input:checked) {
+  background: linear-gradient(#f7c767, var(--aksen));
+  border-color: var(--aksen-tua);
+  color: var(--kayu-gelap);
+  font-weight: 700;
+}
+.ubin .pilihan:has(input:checked) small {
+  color: #5b3b12;
+}
+.ubin .pilihan:has(input:focus-visible) {
+  outline: 3px solid var(--teks);
+  outline-offset: 2px;
+}
 .layar button {
   min-height: 44px;
   padding: 0 20px;
-  border-radius: 8px;
-  border: 1px solid var(--garis);
-  background: transparent;
+  border-radius: 6px;
+  border: 1px solid var(--kayu-gelap);
+  border-bottom-width: 3px;
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
   color: var(--teks);
   cursor: pointer;
 }
 .layar button.utama {
-  border-color: var(--aksen);
-  background: rgba(255, 209, 102, 0.15);
-  font-weight: 700;
-  min-width: 160px;
+  min-width: 200px;
+  min-height: 52px;
+  font-size: 1.2rem;
 }
 .tombol-baris {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
 }
 .aturan {
-  max-width: 560px;
+  max-width: 600px;
   text-align: left;
   color: var(--teks-redup);
 }
 .aturan summary {
+  justify-content: center;
+  color: var(--aksen);
+  text-decoration: underline;
+  text-underline-offset: 4px;
   cursor: pointer;
   min-height: 44px;
   display: flex;
   align-items: center;
   color: var(--teks);
+  font-family: var(--slab);
 }
 .aturan li {
   margin-bottom: 6px;
@@ -426,9 +639,22 @@ button:focus-visible {
   margin: 0;
 }
 .poin {
-  font-weight: 700;
-  color: var(--aksen);
   margin: 0;
+  padding: 6px 20px;
+  font-family: var(--slab);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--kapur);
+  background: var(--tekstur), var(--papan);
+  background-blend-mode: soft-light, normal;
+  border: 4px solid var(--kayu-terang);
+  border-radius: 3px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+}
+.akhir h2 {
+  font-size: 2.2rem;
+  color: var(--aksen);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
 }
 .aksi {
   display: flex;
@@ -462,9 +688,10 @@ button:focus-visible {
 }
 .bantuan {
   grid-area: bantuan;
-  padding: 8px 10px;
-  border: 1px solid var(--garis);
-  border-radius: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--garis);
   font-size: 0.8rem;
   color: var(--teks-redup);
 }
@@ -485,8 +712,9 @@ button:focus-visible {
   min-width: 1.2em;
   padding: 0 4px;
   border-radius: 4px;
-  background: var(--garis);
-  color: var(--teks);
+  background: rgba(236, 232, 218, 0.18);
+  color: var(--kapur);
+  font-family: var(--slab);
   text-align: center;
 }
 .bantuan table {

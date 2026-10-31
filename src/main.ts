@@ -34,6 +34,8 @@ import { muatPengaturan, simpanPengaturan } from './penyimpanan.ts';
 import { htmlMeja } from './tampilan/meja-html.ts';
 import { AREA_LUAS, AREA_SEMPIT } from './tampilan/tata-rantai.ts';
 import { htmlMenu, htmlPartaiSelesai, htmlAkhir } from './tampilan/layar-html.ts';
+import { buatSuara } from './suara.ts';
+import type { Efek } from './suara.ts';
 
 const parameter = new URLSearchParams(location.search);
 const acak = buatAcak(Number(parameter.get('benih') ?? Date.now() % 100000));
@@ -61,6 +63,34 @@ let dijeda = false;
 let saran: Saran | null = null; // saran langkah yang sedang tampil (mode Latihan)
 let pewaktu: ReturnType<typeof setTimeout> | undefined;
 
+// Suara: konteks audio dibuat saat efek pertama diputar (setelah ketukan pemain).
+const suara = buatSuara(() => new AudioContext(), aplikasi.pengaturan.suara);
+let kunciKocokan = ''; // partai dan kocokan yang riwayatnya sedang diikuti untuk suara
+let riwayatTerdengar = 0;
+let layarSebelumnya = '';
+
+/** Memutar efek untuk langkah yang baru terjadi sejak gambar terakhir. */
+function bunyikan(layar: string): void {
+  const partai = partaiAktif(aplikasi);
+  if (layar === 'akhir' && layarSebelumnya !== 'akhir') {
+    suara.putar(aplikasi.pertandingan?.juara === 0 ? 'menang' : 'kalah');
+  }
+  layarSebelumnya = layar;
+  if (partai === null || partai.kocokan === null) return;
+  const kunci = `${nomorPartaiSaatIni()}-${partai.nomorKocokan}`;
+  const { riwayat } = partai.kocokan;
+  if (kunci === kunciKocokan && riwayat.length > riwayatTerdengar) {
+    const terakhir = riwayat.at(-1);
+    if (terakhir !== undefined) {
+      const efek: Efek = terakhir.aksi === 'lewat' ? 'lewat' : terakhir.kartu.a === terakhir.kartu.b ? 'balak' : 'letak';
+      suara.putar(efek);
+    }
+  }
+  kunciKocokan = kunci;
+  riwayatTerdengar = riwayat.length;
+}
+const nomorPartaiSaatIni = (): number => (aplikasi.pertandingan === null ? 0 : nomorPartai(aplikasi));
+
 // Layar sempit (HP) memakai area rantai yang lebih tinggi dan kurang lebar.
 const layarSempit = window.matchMedia('(max-width: 640px)');
 const areaRangkaian = () => (layarSempit.matches ? AREA_SEMPIT : AREA_LUAS);
@@ -69,6 +99,7 @@ function gambar(): void {
   clearTimeout(pewaktu);
   const layar = layarAktif(aplikasi);
   const { pertandingan } = aplikasi;
+  bunyikan(layar);
 
   if (layar === 'menu' || pertandingan === null) {
     app.innerHTML = htmlMenu(aplikasi.pengaturan);
@@ -87,6 +118,7 @@ function gambar(): void {
       bantuan: aplikasi.pengaturan.bantuan,
       latihan: aplikasi.pengaturan.mode === 'latihan',
       saran,
+      suara: aplikasi.pengaturan.suara,
     });
     if (!dijeda && adaLangkahOtomatis(partai)) {
       pewaktu = setTimeout(() => {
@@ -143,6 +175,11 @@ app.addEventListener('click', (e) => {
     const partai = partaiAktif(aplikasi);
     saran = partai === null ? null : saranManusia(partai, acak);
     gambar();
+  } else if (aksi === 'suara') {
+    aplikasi = ubahPengaturan(aplikasi, { suara: !aplikasi.pengaturan.suara });
+    suara.aktif(aplikasi.pengaturan.suara);
+    simpanPengaturan(penyimpanan, aplikasi.pengaturan);
+    gambar();
   } else if (aksi === 'jeda') {
     dijeda = !dijeda;
     gambar();
@@ -163,7 +200,10 @@ app.addEventListener('change', (e) => {
   else if (name === 'mode' && adalahMode(value)) aplikasi = ubahPengaturan(aplikasi, { mode: value });
   else if (name === 'ai' && adalahAi(value)) aplikasi = ubahPengaturan(aplikasi, { ai: value });
   else if (name === 'bantuan') aplikasi = ubahPengaturan(aplikasi, { bantuan: e.target.checked });
-  else return;
+  else if (name === 'suara') {
+    aplikasi = ubahPengaturan(aplikasi, { suara: e.target.checked });
+    suara.aktif(aplikasi.pengaturan.suara);
+  } else return;
   simpanPengaturan(penyimpanan, aplikasi.pengaturan);
 });
 

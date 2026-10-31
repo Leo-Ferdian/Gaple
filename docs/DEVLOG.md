@@ -11,6 +11,17 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-01 | Tema warung malam (PC), suara, dan catatan mobile
+
+- **Tujuan:** tampilan PC yang tidak terlihat polos atau seperti templat; mobile ditunda.
+- **Dikerjakan:** (1) Tema "warung malam": meja beludru hijau bertekstur di bingkai kayu, lampu di atas, papan skor kapur untuk markah (angka besar dan garis kapur putus-putus sebagai kemajuan), tombol kayu dan tombol kuning lampu untuk aksi utama, huruf slab (Rockwell, bila tidak ada Georgia) untuk judul, skor, dan status. (2) Menu: papan nama kayu dengan dua kartu balak miring, pilihan menjadi ubin (yang terpilih menyala), dua kolom. (3) Layar akhir dan ringkasan kocokan memakai papan kapur. (4) Kartu diberi bayangan; kartu legal menyala kuning. (5) Efek suara disintesis dengan WebAudio (`src/suara.ts`, tanpa berkas audio): klak kartu, klak balak, dua ketukan saat lewat, nada menang dan kalah. Pengaturan baru `suara` (bawaan menyala) di menu dan tombol di bar.
+- **Keputusan:** font tanpa unduhan (tumpukan font sistem) supaya game tetap bisa dipakai luring dan tanpa dependensi. Cakupan sesuai pilihan Anda: menu, panel info dan skor, tipografi, warna, dan suara; bentuk meja dan kartu tidak diubah selain warna dan bayangan. Satu momen yang sengaja menjadi ciri: papan skor kapur.
+- **Catatan pengembangan lanjutan (mobile, setelah PC selesai):** tampilan ponsel sengaja belum dipoles. Yang perlu dikerjakan: bar skor dan papan kapur untuk layar sempit (sekarang tiga kolom lama), bingkai kayu yang lebih tipis, menu satu kolom, ukuran kartu di ponsel (kerangka khusus ponsel, lihat entri tata letak rantai), tombol berukuran ketuk, dan pengujian di perangkat nyata.
+- **Tes:** 3 tes suara (konteks palsu), 1 tes pengaturan suara; 261 tes lolos.
+- **Berikutnya:** menunggu penilaian Anda atas tampilan, lalu bagian meja dan kartu bila diinginkan.
+
+---
+
 ## 2026-10-31 | README baru
 
 - **Tujuan:** README yang ringkas dan menarik untuk halaman GitHub.

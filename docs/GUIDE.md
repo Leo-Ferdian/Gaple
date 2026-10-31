@@ -58,6 +58,7 @@ gaple/
     ai-sulit.ts   pemain komputer tingkat Sulit
     controller.ts jembatan mesin dan tampilan: giliran manusia, langkah komputer
     penyimpanan.ts simpan dan muat pengaturan (localStorage)
+    suara.ts       efek suara sintetis (WebAudio, konteks dioper dari luar)
     main.ts       titik masuk browser
     tampilan/
       kartu-svg.ts  kartu domino sebagai teks SVG
@@ -412,6 +413,12 @@ Pemain manusia selalu Selatan (0); tiga lainnya komputer yang bermain acak (AI M
 | `lanjutkan(a, acak)` | Tombol lanjut: ringkasan kocokan menjadi kocokan berikutnya atau akhir partai; akhir partai menjadi partai berikutnya atau layar hasil. Melempar Error di layar lain. |
 | `kembaliKeMenu(a)` | Pengaturan tetap, pertandingan dibuang. |
 | `partaiAktif(a)`, `nomorPartai(a)`, `ubahPartaiAktif(a, fn)` | Akses dan pembaruan partai yang sedang berjalan. |
+
+### `src/suara.ts`
+
+| Fungsi | Fungsi |
+| --- | --- |
+| `buatSuara(buatKonteks, aktifAwal)` | Pemutar efek (`letak`, `balak`, `lewat`, `menang`, `kalah`) yang disintesis dari osilator WebAudio. Konteks dibuat sekali saat efek pertama diputar; `aktif(bool)` menyalakan atau mematikan. Tanpa konteks audio, tidak melakukan apa-apa. |
 
 ### `src/penyimpanan.ts`
 
