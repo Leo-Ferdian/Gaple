@@ -63,6 +63,10 @@ gaple/
   .editorconfig   indentasi dan akhir baris
   .github/workflows/ci.yml  pemeriksaan otomatis tiap push dan pull request
   README.md
+  CLAUDE.md       petunjuk untuk asisten AI dan pengembang
+  TECHSTACK.md    teknologi yang dipakai dan alasannya
+  SKILSS.md       kemampuan yang dibutuhkan dan rujukannya
+  SECURITY.md     kebijakan keamanan dan cara melapor
   index.html      halaman game (potongan 7)
   style.css       tampilan meja dan kartu
   docs/

@@ -1,6 +1,6 @@
 # HASIL SIMULASI: gerbang tahap 1
 
-Versi kode: 0.23.1. Benih 1 sampai 518 (bo3 untuk benih ganjil, bo5 untuk benih genap). Semua pemain bermain acak.
+Versi kode: 0.23.2. Benih 1 sampai 518 (bo3 untuk benih ganjil, bo5 untuk benih genap). Semua pemain bermain acak.
 
 **Hasil: 10.002 kocokan dalam 1.738 partai dan 518 pertandingan, tanpa satu pelanggaran aturan pun.**
 

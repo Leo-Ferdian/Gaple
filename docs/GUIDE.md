@@ -34,6 +34,10 @@ gaple/
   README.md       pintu masuk proyek
   index.html      halaman game
   style.css       tampilan
+  CLAUDE.md       petunjuk untuk asisten AI dan pengembang
+  TECHSTACK.md    teknologi yang dipakai dan alasannya
+  SKILSS.md       kemampuan yang dibutuhkan dan rujukannya
+  SECURITY.md     kebijakan keamanan dan cara melapor
   docs/
     DEVLOG.md     catatan proses pengembangan
     GUIDE.md      dokumen ini

@@ -11,6 +11,15 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-10-31 | Berkas tertunda
+
+- **Tujuan:** melengkapi berkas dokumentasi yang ditunda.
+- **Dikerjakan:** `CLAUDE.md` (petunjuk kerja dan aturan), `TECHSTACK.md` (teknologi), `SKILSS.md` (kemampuan dan rujukan), `SECURITY.md` (kebijakan dan cara melapor). Struktur di `docs/GUIDE.md` dan README diperbarui.
+- **Keputusan:** isi diambil dari kondisi proyek yang ada (tanpa dependensi runtime, `localStorage` saja); tidak ada kode yang berubah. Cara membuat rilis GitHub saya berikan di chat, bukan di berkas.
+- **Berikutnya:** menunggu pilihan Anda.
+
+---
+
 ## 2026-10-31 | Perbaikan: balak di sudut dan segmen tengah
 
 - **Tujuan:** balak di sudut harus tetap tampil sebagai balak, dan belokan tidak terlalu rapat.
