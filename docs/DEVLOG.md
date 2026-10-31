@@ -11,6 +11,24 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-10-31 | README baru
+
+- **Tujuan:** README yang ringkas dan menarik untuk halaman GitHub.
+- **Dikerjakan:** ditulis ulang: fitur, aturan singkat, mulai cepat, tabel perintah utama, kekuatan AI, arsitektur singkat, tautan dokumen. Pohon berkas panjang (yang sudah tertinggal dari berkas tes sebenarnya) dipindahkan ke rujukan `docs/GUIDE.md`.
+- **Keputusan:** daftar tahap dan potongan tidak dimasukkan lagi (sudah ada di DEVLOG). Tanpa bagian lisensi karena proyek belum punya berkas lisensi.
+- **Berikutnya:** menunggu pilihan Anda.
+
+---
+
+## 2026-10-31 | README baru
+
+- **Tujuan:** README yang lebih rapi sebagai pintu masuk proyek.
+- **Dikerjakan:** README ditulis ulang: judul dan lencana, ringkasan, fitur, aturan singkat, mulai cepat, parameter alamat, perintah, kekuatan AI (angka dari pengukuran di DEVLOG), arsitektur, dan tabel dokumen.
+- **Keputusan:** lencana tes (257) dan versi ditulis tangan, jadi harus diperbarui bersama versi di `package.json`.
+- **Berikutnya:** menunggu pilihan Anda.
+
+---
+
 ## 2026-10-31 | Berkas tertunda
 
 - **Tujuan:** melengkapi berkas dokumentasi yang ditunda.
