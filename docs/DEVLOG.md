@@ -11,6 +11,16 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-10-31 | Perbaikan: balak di sudut dan segmen tengah
+
+- **Tujuan:** balak di sudut harus tetap tampil sebagai balak, dan belokan tidak terlalu rapat.
+- **Dikerjakan:** (1) Balak yang tidak muat lurus kini berdiri melintang di tengah sumbu baris (setengahnya menjorok ke sisi belokan, setengahnya ke sisi lain), lalu rantai tersambung dari ujung atas atau bawahnya searah belokan. Bila ruangnya tidak cukup, kembali ke belokan siku biasa dengan kartu digambar biasa. (2) Segmen tengah (antara belokan pertama dan kedua) minimal 3 kartu sebelum boleh berbelok lagi; kerangka minimal tinggi naik dari 3 ke 3,5 panjang kartu. (3) Balak di segmen terakhir digambar sebagai kartu biasa agar tidak menempel pada balak di baris utama.
+- **Keputusan:** pencarian web untuk proyek domino sejenis tidak menemukan acuan tata letak rantai yang berguna (hanya pustaka logika permainan), jadi aturan disusun dari permintaan Anda dan permainan fisik. Dampaknya: segmen tengah lebih panjang sehingga kartu lebih sering mengecil (skala rata-rata minimal tes turun 0,75 ke 0,6 untuk meja lebar, 0,6 ke 0,5 untuk ponsel).
+- **Tes:** tes belokan sesudah balak diganti (kartu sesudah balak sudut harus tepat di tengah ujungnya), tes balak sudut melintang diganti, batas skala disesuaikan.
+- **Berikutnya:** menunggu pilihan Anda.
+
+---
+
 ## 2026-10-31 | Tahap 6: AI Sulit dan mode Latihan
 
 - **Tujuan:** AI Sulit yang memakai pelacak, dan mode latihan.

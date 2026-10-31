@@ -14,6 +14,7 @@
 //     kartu untuk belokan), rantai membelok siku 90 derajat: kartu belokan diletakkan di UJUNG
 //     kartu terakhir lalu rantai lanjut tegak lurus. Ujung kiri: ke atas, lalu ke kanan. Ujung
 //     kanan: ke bawah, lalu ke kiri. Paling banyak dua belokan; segmen ketiga tidak dibatasi.
+//  (Kartu double yang menjadi kartu sudut digambar sebagai kartu biasa, bukan melintang.)
 //  4. Belokan tidak boleh langsung sesudah double (kartu belokan akan sejajar menempel). Karena
 //     tidak melihat ke depan: double hanya dipasang lurus bila sesudahnya masih muat satu kartu
 //     biasa; jika tidak, double itulah kartu belokannya.
@@ -102,6 +103,8 @@ interface KartuTertata {
   readonly kartu: KartuTarget;
   readonly pusat: Titik;
   readonly arah: ArahJalan;
+  /** Digambar melintang? False untuk double yang menjadi kartu sudut (digambar sebagai kartu biasa). */
+  readonly melintang: boolean;
 }
 interface PosisiKartu {
   readonly id: string;
@@ -111,6 +114,7 @@ interface PosisiKartu {
   readonly awal: Angka;
   readonly akhir: Angka;
   readonly dobel: boolean;
+  readonly melintang: boolean;
   readonly sisi: SisiRantai;
 }
 
@@ -129,7 +133,9 @@ const MARGIN = 8; // jarak minimal kartu dari tepi area
 export const SKALA_AWAL = 0.8;
 /** Ukuran kerangka minimal (dalam panjang kartu, setengah lebar dan setengah tinggi). */
 const KERANGKA_MIN_LEBAR = 3;
-const KERANGKA_MIN_TINGGI = 3;
+const KERANGKA_MIN_TINGGI = 3.5;
+/** Segmen tengah (antara belokan pertama dan kedua) berisi minimal sekian kartu sebelum boleh berbelok lagi. */
+const MIN_SEGMEN_TENGAH = 3;
 const TOLERANSI = 0.01;
 const MAKS_BELOKAN = 2;
 /** Jarak bebas minimal antara dua kartu yang bukan tetangga di rantai, supaya tidak tampak bertumpuk. */
@@ -212,6 +218,7 @@ function tataSatuSisi(
   let kursor: Titik = { ...kursorAwal }; // pusat sisi depan kartu terakhir
   let setengahMelintangSebelum = lebarAcrossAwal;
   let belok = 0;
+  let dalamSegmen = 0; // jumlah kartu di segmen sekarang
   const hasil: KartuTertata[] = [];
   const milik: Kotak[] = []; // kotak kartu di ujung ini, dari yang terdekat ke anchor
 
@@ -238,14 +245,21 @@ function tataSatuSisi(
   };
 
   for (const kartu of kartuKeluar) {
+    let sudut = false; // sudah berbelok untuk kartu ini: double menjadi kartu sudut, digambar sebagai kartu biasa
     for (;;) {
-      const sepanjang = kartu.dobel ? ukuran.lebar : ukuran.panjang;
-      const pusat: Titik = { x: kursor.x + ARAH[arah].dx * (sepanjang / 2), y: kursor.y + ARAH[arah].dy * (sepanjang / 2) };
-      const kotak = kotakKartu(pusat, arah, kartu.dobel, ukuran);
       const terakhir = belok >= MAKS_BELOKAN; // segmen terakhir: panjangnya tidak dibatasi
+      const coba = (m: boolean) => {
+        const sepanjang = m ? ukuran.lebar : ukuran.panjang;
+        const pusat: Titik = { x: kursor.x + ARAH[arah].dx * (sepanjang / 2), y: kursor.y + ARAH[arah].dy * (sepanjang / 2) };
+        return { sepanjang, pusat, kotak: kotakKartu(pusat, arah, m, ukuran) };
+      };
+      let melintang = kartu.dobel && !sudut && !terakhir; // segmen terakhir (bisa panjang, kembali ke dekat anchor): double digambar sebagai kartu biasa
+      const { sepanjang, pusat, kotak } = coba(melintang);
 
-      let terima = terakhir || (muatDenganCadangan(kotak, arah) && !bentrok(kotak, milik));
-      if (terima && kartu.dobel && !terakhir) {
+      // Double wajib hanya bila kartu sesudahnya juga masih wajib (kalau tidak, double itu jadi kartu sudut).
+      const wajib = belok === 1 && dalamSegmen + (melintang ? 1 : 0) < MIN_SEGMEN_TENGAH && !bentrok(kotak, milik);
+      let terima = terakhir || wajib || (muatDenganCadangan(kotak, arah) && !bentrok(kotak, milik));
+      if (terima && melintang && !terakhir && !wajib) {
         // Double hanya dipasang lurus bila sesudahnya masih muat satu kartu biasa.
         const kursorBerikut: Titik = { x: kursor.x + ARAH[arah].dx * sepanjang, y: kursor.y + ARAH[arah].dy * sepanjang };
         const pusatBerikut: Titik = {
@@ -258,23 +272,52 @@ function tataSatuSisi(
 
       if (terima) {
         milik.push(kotak);
-        hasil.push({ kartu, pusat, arah });
+        hasil.push({ kartu, pusat, arah, melintang });
+        dalamSegmen++;
         kursor = { x: kursor.x + ARAH[arah].dx * sepanjang, y: kursor.y + ARAH[arah].dy * sepanjang };
-        setengahMelintangSebelum = (kartu.dobel ? ukuran.panjang : ukuran.lebar) / 2;
+        setengahMelintangSebelum = (melintang ? ukuran.panjang : ukuran.lebar) / 2;
         break;
+      }
+
+      // Double di sudut: tetap balak, berdiri melintang di tengah sumbu baris, lalu rantai tersambung dari
+      // ujung atas/bawahnya (sisi arah belok). Bila tidak muat, kembali ke belokan siku biasa di bawah.
+      const arahBaru = urutanBelok[belok];
+      if (kartu.dobel && !sudut && !terakhir && arahBaru !== undefined) {
+        const pusatBerikut: Titik = {
+          x: pusat.x + ARAH[arahBaru].dx * ukuran.panjang,
+          y: pusat.y + ARAH[arahBaru].dy * ukuran.panjang,
+        };
+        const berikut = kotakKartu(pusatBerikut, arahBaru, false, ukuran);
+        if (
+          didalamKerangka(kotak, kerangka) &&
+          !bentrok(kotak, milik) &&
+          didalamKerangka(berikut, kerangka) &&
+          !bentrok(berikut, [...milik, kotak])
+        ) {
+          milik.push(kotak);
+          hasil.push({ kartu, pusat, arah, melintang: true });
+          kursor = { x: pusat.x + ARAH[arahBaru].dx * (ukuran.panjang / 2), y: pusat.y + ARAH[arahBaru].dy * (ukuran.panjang / 2) };
+          setengahMelintangSebelum = ukuran.lebar / 2;
+          arah = arahBaru;
+          belok++;
+          dalamSegmen = 1;
+          break;
+        }
       }
 
       // Belokan siku: kartu belokan diletakkan DI UJUNG kartu terakhir (sisi pendeknya menempel pada
       // sisi ujung kartu terakhir, rata dengan tepi yang menjauhi arah belok), lalu rantai lanjut tegak lurus.
       const baru = urutanBelok[belok];
       if (baru === undefined) throw new Error('urutan belok habis');
-      const setengahMelintangBaru = (kartu.dobel ? ukuran.panjang : ukuran.lebar) / 2;
+      const setengahMelintangBaru = ukuran.lebar / 2; // kartu sudut selalu digambar sebagai kartu biasa
       kursor = {
         x: kursor.x + ARAH[arah].dx * setengahMelintangBaru - ARAH[baru].dx * setengahMelintangSebelum,
         y: kursor.y + ARAH[arah].dy * setengahMelintangBaru - ARAH[baru].dy * setengahMelintangSebelum,
       };
       arah = baru;
       belok++;
+      dalamSegmen = 0;
+      sudut = true;
     }
   }
   return hasil;
@@ -329,10 +372,11 @@ function susun(rangkaian: readonly Letak[], anchor: number, area: Area, ukuran: 
     id: p.kartu.kartu.id,
     pusat: p.pusat,
     arah: p.arah,
-    putar: ARAH[p.arah].putar + (p.kartu.dobel ? 90 : 0),
+    putar: ARAH[p.arah].putar + (p.melintang ? 90 : 0),
     awal: p.kartu.awal,
     akhir: p.kartu.akhir,
     dobel: p.kartu.dobel,
+    melintang: p.melintang,
     sisi,
   });
   const tengah: PosisiKartu = {
@@ -343,6 +387,7 @@ function susun(rangkaian: readonly Letak[], anchor: number, area: Area, ukuran: 
     awal: kartuAnchor.kiri,
     akhir: kartuAnchor.kanan,
     dobel: dobelAnchor,
+    melintang: dobelAnchor,
     sisi: 'anchor',
   };
   // `kiri` ditata menjauhi anchor, jadi dibalik supaya urut dari kiri ke kanan.
@@ -351,7 +396,7 @@ function susun(rangkaian: readonly Letak[], anchor: number, area: Area, ukuran: 
   // Kamera: skala seragam di sekitar anchor. Hanya mengecil bila ada kartu di luar area (segmen terakhir panjang).
   let skala = SKALA_AWAL;
   for (const p of posisi) {
-    const k = kotakKartu(p.pusat, p.arah === 'pusat' ? 'timur' : p.arah, p.dobel, ukuran);
+    const k = kotakKartu(p.pusat, p.arah === 'pusat' ? 'timur' : p.arah, p.melintang, ukuran);
     const jx = Math.max(Math.abs(k.x1), Math.abs(k.x2));
     const jy = Math.max(Math.abs(k.y1), Math.abs(k.y2));
     if (jx > 0) skala = Math.min(skala, (area.lebar / 2 - MARGIN) / jx);

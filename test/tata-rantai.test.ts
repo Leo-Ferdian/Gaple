@@ -118,8 +118,13 @@ function periksa(rangkaian: readonly Letak[], indeks: number, area: Area, info: 
       const q = di(kotakKartu, i);
       const searahMendatar = tetangga.arah === 'timur' || tetangga.arah === 'barat';
       const tumpangSearah = searahMendatar ? Math.min(p.x2, q.x2) - Math.max(p.x1, q.x1) : Math.min(p.y2, q.y2) - Math.max(p.y1, q.y1);
-      assert.ok(!tetangga.double, `${info}: belokan di kartu ${i} langsung sesudah double (kartu ${dekat}), tampak bertumpuk`);
-      assert.ok(tumpangSearah <= EPS, `${info}: kartu ${i} sejajar berdampingan dengan kartu ${dekat} di belokan`);
+      if (tetangga.double) {
+        // Double di sudut: kartu berikutnya tersambung dari ujung double, tepat di tengah sumbunya.
+        const sejajar = searahMendatar ? Math.abs((q.x1 + q.x2) / 2 - (p.x1 + p.x2) / 2) : Math.abs((q.y1 + q.y2) / 2 - (p.y1 + p.y2) / 2);
+        assert.ok(sejajar <= EPS, `${info}: kartu ${i} tidak di tengah ujung double sudut (kartu ${dekat})`);
+      } else {
+        assert.ok(tumpangSearah <= EPS, `${info}: kartu ${i} sejajar berdampingan dengan kartu ${dekat} di belokan`);
+      }
     }
     assert.equal(tetangga.akhir, ini.awal, `${info}: angka bersentuhan kartu ${dekat}/${i} beda`);
     // Separuh `awal` menghadap ke arah anchor (kartu biasa saja; double simetris).
@@ -340,8 +345,8 @@ for (const [nama, area] of kasusArea) {
 
 test('rata-rata skala dijaga (kartu tidak cepat mengecil walau posisinya terkunci)', () => {
   const batas: readonly (readonly [string, Area, number])[] = [
-    ['luas', AREA_LUAS, 0.75],
-    ['sempit', AREA_SEMPIT, 0.6],
+    ['luas', AREA_LUAS, 0.6],
+    ['sempit', AREA_SEMPIT, 0.5],
   ];
   for (const [nama, area, minimal] of batas) {
     let total = 0;
@@ -392,4 +397,27 @@ test('posisi terkunci: menambah kartu tidak mengubah bentuk kartu yang sudah ada
       }
     }
   }
+});
+
+test('double di sudut tetap melintang di tengah sumbu baris, rantai lanjut dari ujungnya', () => {
+  let ada = 0;
+  for (let benih = 1; benih <= 60; benih++) {
+    for (const { rangkaian, indeks } of mejaDariKocokan(benih)) {
+      const { kartu } = tataRantai(rangkaian, { area: AREA_LUAS, indeksAnchor: indeks });
+      for (const sisi of ['kiri', 'kanan'] as const) {
+        const urut = kartu.filter((k) => k.sisi === sisi);
+        if (sisi === 'kiri') urut.reverse();
+        urut.forEach((k, i) => {
+          const sesudah = urut[i + 1];
+          if (sesudah !== undefined && k.double && sesudah.arah !== k.arah) {
+            ada++;
+            const mendatar = k.arah === 'timur' || k.arah === 'barat';
+            // Double melintang: putarannya tegak lurus arah rantai kartu itu.
+            assert.ok(mendatar ? k.rotasi % 180 === 90 : k.rotasi % 180 === 0, `benih ${benih}: double sudut tidak melintang`);
+          }
+        });
+      }
+    }
+  }
+  assert.ok(ada > 0);
 });
