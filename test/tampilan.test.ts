@@ -8,6 +8,7 @@ import { langkahAcakPartai } from '../src/simulasi.ts';
 import { kartuLegalPemain } from '../src/kocokan.ts';
 import { svgKartu, svgPunggung, ARAH_DATAR } from '../src/tampilan/kartu-svg.ts';
 import { htmlMeja, PEMAIN_MANUSIA } from '../src/tampilan/meja-html.ts';
+import { menungguManusia, saranManusia } from '../src/controller.ts';
 
 const hitung = (teks: string, pola: RegExp): number => (teks.match(pola) ?? []).length;
 
@@ -152,4 +153,43 @@ test('meja: panel bantuan tidak membocorkan tangan lawan (tampilan sama bila tan
   const ambil = (html: string): string =>
     html.slice(html.indexOf('class="bantuan"'), html.indexOf('</section>', html.indexOf('class="bantuan"')));
   assert.equal(ambil(htmlMeja(tukar, { bantuan: true })), ambil(htmlMeja(partai, { bantuan: true })));
+});
+
+test('meja: mode Latihan menampilkan tombol Saran dan Bantuan hitung; mode biasa tidak', () => {
+  let ada = 0;
+  for (let benih = 1; benih <= 40; benih++) {
+    const partai = sampaiGilirannya(benih, benih % 15);
+    if (partai.status !== 'berjalan' || !menungguManusia(partai)) continue;
+    ada++;
+    const latihan = htmlMeja(partai, { latihan: true });
+    assert.match(latihan, /data-aksi="saran"/);
+    assert.match(latihan, /class="bantuan"/);
+    assert.match(latihan, /Latihan · Poin/);
+    const biasa = htmlMeja(partai);
+    assert.doesNotMatch(biasa, /data-aksi="saran"|class="bantuan"|Latihan/);
+  }
+  assert.ok(ada > 5);
+});
+
+test('meja: saran menyorot kartu yang disarankan dan menyebut sisinya; tombol Saran hilang', () => {
+  for (let benih = 1; benih <= 40; benih++) {
+    const partai = sampaiGilirannya(benih, benih % 15);
+    if (partai.status !== 'berjalan' || !menungguManusia(partai)) continue;
+    const saran = saranManusia(partai, buatAcak(benih));
+    if (saran === null) throw new Error('harus ada saran');
+    const html = htmlMeja(partai, { latihan: true, saran });
+    assert.equal(hitung(html, /class="kartu-tangan legal[^"]* saran"/g), 1);
+    assert.match(html, new RegExp(`class="kartu-tangan legal[^"]* saran" data-kartu="${saran.kartu.id}"`));
+    assert.match(html, new RegExp(`Saran: kartu ${saran.kartu.a}-${saran.kartu.b} `));
+    assert.doesNotMatch(html, /data-aksi="saran"/);
+    return;
+  }
+  throw new Error('tidak ada keadaan untuk diuji');
+});
+
+test('meja: bukan giliran Anda, tombol Saran tidak tampil walau mode Latihan', () => {
+  const acak = buatAcak(5);
+  const partai = bagiKocokan(mulaiPartai([0, 0]), acak);
+  if (partai.kocokan.giliran === PEMAIN_MANUSIA) return;
+  assert.doesNotMatch(htmlMeja(partai, { latihan: true }), /data-aksi="saran"/);
 });

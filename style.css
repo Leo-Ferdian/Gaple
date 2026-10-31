@@ -521,3 +521,34 @@ button:focus-visible {
     margin-top: 0;
   }
 }
+
+/* ---- potongan 20: mode Latihan, tombol Saran ---- */
+.saran-baris {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+}
+.teks-saran {
+  margin: 0;
+  color: var(--aksen);
+  text-align: center;
+}
+.kartu-tangan.saran {
+  outline: 3px solid var(--aksen);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Layar sempit: panel bantuan tetap di bawah rangkaian, lawan tetap sebaris di atas. */
+@media (max-width: 640px) {
+  .meja.dengan-bantuan {
+    grid-template-areas:
+      'bar bar bar'
+      'barat utara timur'
+      'tengah tengah tengah'
+      'bantuan bantuan bantuan'
+      'tangan tangan tangan';
+    grid-template-rows: auto auto 1fr auto auto;
+  }
+}

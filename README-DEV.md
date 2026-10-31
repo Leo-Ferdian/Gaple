@@ -27,26 +27,26 @@ node --version
 
 Jalankan dari folder proyek (folder yang berisi `package.json`):
 
-| Perintah | Fungsi |
-| --- | --- |
-| `npm install` | Memasang alat (TypeScript, Vite, Vitest, Prettier) ke folder `node_modules` |
-| `npm run dev` | Menjalankan game di http://localhost:8080 (memuat ulang otomatis saat kode berubah). Parameter halaman: `?benih=7` (kocokan sama), `?jeda=0` (komputer tanpa jeda) |
-| `npm run build` | Membuat versi produksi di folder `dist` (tidak dimasukkan ke repository) |
-| `npm run preview` | Menjalankan hasil build untuk dicoba di browser |
-| `npm run typecheck` | Memeriksa tipe TypeScript (harus bersih) |
-| `npm run aturan` | Memeriksa aturan penulisan: tanpa `any`, tanpa `as` (kecuali `as const`), tanpa `!` penegas, tanpa `@ts-ignore` |
-| `npm run format:cek` / `npm run format` | Memeriksa / merapikan format kode dengan Prettier |
-| `npm run cek` | Semua pemeriksaan sekaligus: typecheck, aturan, format, tes, build. Jalankan sebelum menyerahkan pekerjaan |
-| `npm test` | Menjalankan semua pengujian (Vitest) |
-| `npm run test:watch` | Pengujian yang berjalan ulang otomatis saat file berubah |
-| `npm run demo` | Satu pertandingan penuh (bo3) secara acak sampai ada juara (benih bawaan 7) |
-| `npm run demo -- 123 bo5` | Benih 123, format bo5. Benih sama selalu menghasilkan pertandingan sama |
-| `npm run gerbang` | Gerbang tahap 1: 10.000 kocokan acak, tiap kocokan diperiksa ulang oleh pemeriksa mandiri, lalu mencetak statistik |
-| `npm run gerbang -- 100000 500` | 100.000 kocokan mulai benih 500 |
-| `npm run demo:ai` | Mengukur kekuatan AI Sedang melawan AI Mudah (`-- 1000 5`: 1000 partai, benih 5) |
-| `npm run demo:4` | Demo potongan 4: satu partai penuh dengan markah dan bonus |
-| `npm run demo:3` | Demo potongan 3: rantai kocokan dan aturan pembuka |
-| `npm run demo:2` | Demo potongan 2: satu kocokan acak langkah demi langkah |
+| Perintah                                | Fungsi                                                                                                                                                             |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm install`                           | Memasang alat (TypeScript, Vite, Vitest, Prettier) ke folder `node_modules`                                                                                        |
+| `npm run dev`                           | Menjalankan game di http://localhost:8080 (memuat ulang otomatis saat kode berubah). Parameter halaman: `?benih=7` (kocokan sama), `?jeda=0` (komputer tanpa jeda) |
+| `npm run build`                         | Membuat versi produksi di folder `dist` (tidak dimasukkan ke repository)                                                                                           |
+| `npm run preview`                       | Menjalankan hasil build untuk dicoba di browser                                                                                                                    |
+| `npm run typecheck`                     | Memeriksa tipe TypeScript (harus bersih)                                                                                                                           |
+| `npm run aturan`                        | Memeriksa aturan penulisan: tanpa `any`, tanpa `as` (kecuali `as const`), tanpa `!` penegas, tanpa `@ts-ignore`                                                    |
+| `npm run format:cek` / `npm run format` | Memeriksa / merapikan format kode dengan Prettier                                                                                                                  |
+| `npm run cek`                           | Semua pemeriksaan sekaligus: typecheck, aturan, format, tes, build. Jalankan sebelum menyerahkan pekerjaan                                                         |
+| `npm test`                              | Menjalankan semua pengujian (Vitest)                                                                                                                               |
+| `npm run test:watch`                    | Pengujian yang berjalan ulang otomatis saat file berubah                                                                                                           |
+| `npm run demo`                          | Satu pertandingan penuh (bo3) secara acak sampai ada juara (benih bawaan 7)                                                                                        |
+| `npm run demo -- 123 bo5`               | Benih 123, format bo5. Benih sama selalu menghasilkan pertandingan sama                                                                                            |
+| `npm run gerbang`                       | Gerbang tahap 1: 10.000 kocokan acak, tiap kocokan diperiksa ulang oleh pemeriksa mandiri, lalu mencetak statistik                                                 |
+| `npm run gerbang -- 100000 500`         | 100.000 kocokan mulai benih 500                                                                                                                                    |
+| `npm run demo:ai`                       | Mengukur kekuatan AI Sedang melawan AI Mudah (`-- 1000 5`: 1000 partai, benih 5)                                                                                   |
+| `npm run demo:4`                        | Demo potongan 4: satu partai penuh dengan markah dan bonus                                                                                                         |
+| `npm run demo:3`                        | Demo potongan 3: rantai kocokan dan aturan pembuka                                                                                                                 |
+| `npm run demo:2`                        | Demo potongan 2: satu kocokan acak langkah demi langkah                                                                                                            |
 
 Untuk membuka game: `npm install` (sekali), lalu `npm run dev`, lalu buka http://localhost:8080. Halaman tidak bisa dibuka dengan klik dua kali pada `index.html`, karena browser menolak memuat modul dari `file://`.
 

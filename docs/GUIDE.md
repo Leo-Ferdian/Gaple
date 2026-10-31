@@ -20,6 +20,7 @@ Dari folder proyek (folder yang berisi `package.json`):
 | `npm run demo -- 123 bo5` | Benih 123, format bo5 |
 | `npm run gerbang` | Gerbang tahap 1: 10.000 kocokan acak diperiksa ulang, cetak statistik |
 | `npm run gerbang -- 100000 500` | 100.000 kocokan mulai benih 500 |
+| `npm run demo:sulit` | Mengukur AI Sulit melawan Sedang dan Mudah (lambat, beberapa menit) |
 | `npm run demo:ai` | Mengukur AI Sedang melawan AI Mudah (jumlah partai dan benih opsional) |
 | `npm run demo:4` | Demo potongan 4: satu partai penuh |
 | `npm run demo:3` | Demo potongan 3: rantai kocokan dan aturan pembuka |
@@ -49,7 +50,8 @@ gaple/
     kocokan.ts    state kocokan, main, lewat
     simulasi.ts   memainkan kocokan acak atau dengan kebijakan lain (untuk uji dan demo)
     ai-sedang.ts  pemain komputer tingkat Sedang
-    pelacak.ts    pandangan seorang pemain, kartu keluar, peluang tepat kartu lawan
+    pelacak.ts    pandangan seorang pemain, kartu keluar, peluang tepat kartu lawan, dugaan tangan lawan
+    ai-sulit.ts   pemain komputer tingkat Sulit
     controller.ts jembatan mesin dan tampilan: giliran manusia, langkah komputer
     penyimpanan.ts simpan dan muat pengaturan (localStorage)
     main.ts       titik masuk browser
@@ -66,6 +68,7 @@ gaple/
     potongan-5.ts demo satu pertandingan penuh sampai juara
     potongan-6.ts skrip gerbang tahap 1 (npm run gerbang)
     ai-sedang.ts  ukur kekuatan AI Sedang (npm run demo:ai)
+    ai-sulit.ts   ukur kekuatan AI Sulit (npm run demo:sulit)
   bantu/
     skenario.ts   kocokan buatan sendiri untuk pengujian (di luar test/ supaya tidak dijalankan sebagai tes)
     bantuan-tes.ts pembantu tes bertipe: empat(), nomor(), ada()
@@ -426,7 +429,7 @@ Semua fungsi di sini murni (masukan data, keluaran teks), sehingga bisa diuji di
 
 Pemain manusia tetap Selatan (nomor 0). Kelas CSS `legal` dan `redup` menandai kartu yang bisa dan tidak bisa diketuk.
 
-`layar-html.ts`: `htmlMenu(pengaturan)` (format, lawan, saklar Bantuan hitung, tombol Main, aturan singkat; Sulit dinonaktifkan sampai tahap 6), `htmlPartaiSelesai(pertandingan)` (markah akhir, poin baru, target), `htmlAkhir(pertandingan)` (juara, skor, riwayat partai, Main lagi, Kembali ke menu).
+`layar-html.ts`: `htmlMenu(pengaturan)` (mode, format, lawan, saklar Bantuan hitung, tombol Main, aturan singkat), `htmlPartaiSelesai(pertandingan)` (markah akhir, poin baru, target), `htmlAkhir(pertandingan)` (juara, skor, riwayat partai, Main lagi, Kembali ke menu).
 
 ### `bantu/` (alat uji, bukan bagian game)
 
@@ -481,11 +484,22 @@ Cara menilai: tiap pasangan (kartu, sisi) yang legal diberi nilai; yang tertingg
 | --- | --- |
 | `pandangan(state, pemain)` | Apa yang boleh diketahui `pemain`: tangannya sendiri, meja, riwayat, dan jumlah kartu tiap pemain. Tangan pemain lain tidak ikut. |
 | `angkaTerlarang(riwayat, pemain)` | Angka yang terbukti tidak dimiliki pemain itu (angka di dua ujung meja setiap kali ia lewat). |
-| `buatPelacak(pandangan)` | Membangun pelacak: `keluar`, `belumTerlihat`, `sisaPerAngka`, `terlarang(p)`, `peluangKartu(id, p)`, `peluangPunyaAngka(p, angka)`, `peluangTidakPunya(p, a, b)`. Melempar `Error` bila jumlah kartu tidak cocok atau tidak ada pembagian yang sesuai riwayat. |
+| `buatPelacak(pandangan)` | Membangun pelacak: `keluar`, `belumTerlihat`, `sisaPerAngka`, `terlarang(p)`, `peluangKartu(id, p)`, `peluangPunyaAngka(p, angka)`, `peluangTidakPunya(p, a, b)`, `ambilTangan(acak)` (satu dugaan tangan keempat pemain, seragam di antara semua pembagian yang cocok). Melempar `Error` bila jumlah kartu tidak cocok atau tidak ada pembagian yang sesuai riwayat. |
 
 Peluang dihitung TEPAT, bukan ditebak: kartu yang belum terlihat dibagikan ke tiga pemain lain dengan jumlah kartu tiap pemain tetap dan larangan angka dari riwayat lewat; semua pembagian yang cocok dianggap sama mungkin; peluang = banyak pembagian cocok yang memuat kejadian itu dibagi banyak seluruh pembagian cocok (pemrograman dinamis atas (kartu, kartu di pemain 1, kartu di pemain 2)). Dicocokkan dengan perhitungan brute force di tes. Yang tidak dimodelkan: pilihan langkah pemain lain sebagai petunjuk (hanya fakta pasti, yaitu lewat, yang dipakai).
 
 **Bantuan hitung (UI):** pengaturan `bantuan` (bawaan mati, disimpan bersama pengaturan lain). Bila hidup, meja menampilkan panel: sisa kartu per angka (di luar tangan Anda dan meja) dan tabel peluang Barat, Utara, Timur punya kartu berangka tiap ujung meja serta peluang mereka lewat. Panel dibangun hanya dari `pandangan` Anda (tes: menukar kartu lawan tidak mengubah panel).
+
+### `src/ai-sulit.ts`
+
+| Fungsi | Tugas |
+| --- | --- |
+| `pilihLangkahSulit(state, acak, opsi?)` | Memilih satu langkah (`main` atau `lewat`) untuk pemain yang sedang giliran. Murni; seri dipilih acak dengan `acak` yang dioper. `opsi.dugaan` = banyak dugaan pembagian (bawaan `DUGAAN_BAWAAN` = 60). |
+| `nilaiLangkahSulit(state, acak, opsi?)` | Nilai tiap langkah legal (`{kartu, sisi, nilai}`), terbaik dulu; kosong bila harus lewat. Dipakai juga untuk tombol Saran. |
+
+Cara kerja (determinisasi + simulasi): dari `pandangan` pemain, pelacak menarik dugaan tangan tiga pemain lain (seragam, cocok dengan jumlah kartu dan riwayat lewat). Untuk tiap dugaan, tiap langkah legal dicoba lalu kocokan dimainkan sampai selesai oleh empat AI Sedang; nilai langkah = rata-rata (markah tambahan lawan - markah tambahan tim sendiri), bonus dan tabrak ikut terhitung. Tidak pernah membaca tangan pemain lain (tes: menukar kartu lawan tidak mengubah nilai). Satu keputusan rata-rata beberapa milidetik, paling lama sekitar 0,2 detik. Dengan sedikit dugaan (8) AI ini berisik dan kira-kira setara Sedang; 30 dugaan sudah jelas lebih kuat; 60 dipakai sebagai bawaan. Yang tidak dimodelkan: pertimbangan skor partai (hanya satu kocokan yang disimulasikan) dan petunjuk dari pilihan langkah lawan.
+
+**Mode Latihan:** pengaturan `mode` (`'pertandingan'` atau `'latihan'`). Latihan adalah pertandingan yang sama (format, AI, poin) dengan dua tambahan: Bantuan hitung selalu tampil, dan tombol Saran pada giliran Anda yang menampilkan kartu dan sisi terbaik menurut AI Sulit (`saranManusia` di controller; kartunya disorot). Saran hilang setelah Anda main.
 
 ## 7. Nomor pemain dan tim
 

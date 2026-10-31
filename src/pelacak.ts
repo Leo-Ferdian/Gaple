@@ -15,7 +15,8 @@
 // dipakai sebagai petunjuk; hanya fakta pasti (lewat) yang dipakai.
 
 import { ANGKA_TERBESAR, buatDek } from './engine.ts';
-import type { Angka, Kartu, NomorPemain } from './engine.ts';
+import type { Angka, EmpatTangan, Kartu, NomorPemain } from './engine.ts';
+import type { FungsiAcak } from './rng.ts';
 import type { Meja } from './meja.ts';
 import type { Kejadian, StateKocokan } from './tipe-kocokan.ts';
 
@@ -97,6 +98,11 @@ export interface Pelacak {
   readonly peluangPunyaAngka: (pemain: NomorPemain, angka: Angka) => number;
   /** Peluang pemain itu tidak punya kartu berangka `a` maupun `b` (yaitu lewat bila ujung meja a dan b). */
   readonly peluangTidakPunya: (pemain: NomorPemain, a: Angka, b: Angka) => number;
+  /**
+   * Satu dugaan pembagian kartu yang SERAGAM di antara semua pembagian yang cocok dengan jumlah kartu dan
+   * riwayat lewat. Hasilnya empat tangan: tangan sendiri apa adanya, tiga lainnya hasil dugaan.
+   */
+  readonly ambilTangan: (acak: FungsiAcak) => EmpatTangan;
 }
 
 /** Membangun pelacak dari pandangan seorang pemain. */
@@ -166,7 +172,64 @@ export function buatPelacak(v: Pandangan): Pelacak {
     (_, angka) => belumTerlihat.filter((k) => k.a === angka || k.b === angka).length,
   );
 
+  // Penarikan seragam: f[i][c0, c1] = banyak cara membagi kartu i.. sisanya bila pemain pertama sudah menerima c0
+  // kartu dan pemain kedua c1 kartu (pemain ketiga i - c0 - c1). Kartu ditarik satu per satu sesuai bobot f.
+  const banyak = belumTerlihat.length;
+  const lebarDp = ukuran[1] + 1;
+  const sel = (c0: number, c1: number): number => c0 * lebarDp + c1;
+  const f: number[][] = Array.from({ length: banyak + 1 }, () => new Array<number>((ukuran[0] + 1) * lebarDp).fill(0));
+  const nilaiF = (i: number, c0: number, c1: number): number => f[i]?.[sel(c0, c1)] ?? 0;
+  const tulisF = (i: number, c0: number, c1: number, nilai: number): void => {
+    const baris = f[i];
+    if (baris === undefined) throw new Error('baris f hilang');
+    baris[sel(c0, c1)] = nilai;
+  };
+  tulisF(banyak, ukuran[0], ukuran[1], 1);
+  for (let i = banyak - 1; i >= 0; i--) {
+    const izin = dasar[i];
+    if (izin === undefined) throw new Error('izin hilang');
+    for (let c0 = 0; c0 <= Math.min(i, ukuran[0]); c0++) {
+      for (let c1 = 0; c1 <= Math.min(i - c0, ukuran[1]); c1++) {
+        const c2 = i - c0 - c1;
+        if (c2 > ukuran[2]) continue;
+        const jumlah =
+          (izin[0] && c0 < ukuran[0] ? nilaiF(i + 1, c0 + 1, c1) : 0) +
+          (izin[1] && c1 < ukuran[1] ? nilaiF(i + 1, c0, c1 + 1) : 0) +
+          (izin[2] && c2 < ukuran[2] ? nilaiF(i + 1, c0, c1) : 0);
+        tulisF(i, c0, c1, jumlah);
+      }
+    }
+  }
+
+  const ambilTangan = (acak: FungsiAcak): EmpatTangan => {
+    const hasil: [Kartu[], Kartu[], Kartu[], Kartu[]] = [[], [], [], []];
+    hasil[v.pemain] = [...v.tangan];
+    let c0 = 0;
+    let c1 = 0;
+    for (const [i, kartu] of belumTerlihat.entries()) {
+      const izin = dasar[i];
+      if (izin === undefined) throw new Error('izin hilang');
+      const c2 = i - c0 - c1;
+      const bobot: [number, number, number] = [
+        izin[0] && c0 < ukuran[0] ? nilaiF(i + 1, c0 + 1, c1) : 0,
+        izin[1] && c1 < ukuran[1] ? nilaiF(i + 1, c0, c1 + 1) : 0,
+        izin[2] && c2 < ukuran[2] ? nilaiF(i + 1, c0, c1) : 0,
+      ];
+      const jumlah = bobot[0] + bobot[1] + bobot[2];
+      if (jumlah <= 0) throw new Error('penarikan buntu (seharusnya tidak mungkin)');
+      const titik = acak() * jumlah;
+      const j: 0 | 1 | 2 = titik < bobot[0] ? 0 : titik < bobot[0] + bobot[1] ? 1 : 2;
+      const pemilik = lain[j];
+      if (pemilik === undefined) throw new Error('pemilik hilang');
+      hasil[pemilik].push(kartu);
+      if (j === 0) c0++;
+      else if (j === 1) c1++;
+    }
+    return hasil;
+  };
+
   return {
+    ambilTangan,
     pandangan: v,
     keluar,
     belumTerlihat,

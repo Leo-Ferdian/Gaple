@@ -20,6 +20,11 @@ const PILIHAN_FORMAT: readonly Pilihan[] = [
   { nilai: 'bo5', nama: 'Terbaik dari 5', ket: 'menang 3 partai' },
 ];
 
+const PILIHAN_MODE: readonly Pilihan[] = [
+  { nilai: 'pertandingan', nama: 'Pertandingan' },
+  { nilai: 'latihan', nama: 'Latihan', ket: 'dengan tombol Saran dan Bantuan hitung' },
+];
+
 const PILIHAN_AI: readonly Pilihan[] = [
   { nilai: 'mudah', nama: 'Mudah' },
   { nilai: 'sedang', nama: 'Sedang' },
@@ -57,6 +62,7 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<div class="meja layar menu">` +
     `<h1>Gaple 2vs2</h1>` +
     `<p class="ket">Anda dan Utara melawan Barat dan Timur.</p>` +
+    `<fieldset><legend>Mode</legend>${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</fieldset>` +
     `<fieldset><legend>Format pertandingan</legend>${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</fieldset>` +
     `<fieldset><legend>Lawan</legend>${radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n))}</fieldset>` +
     `<fieldset><legend>Bantuan</legend><label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label></fieldset>` +

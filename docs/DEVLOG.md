@@ -11,6 +11,19 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-10-31 | Tahap 6: AI Sulit dan mode Latihan
+
+- **Tujuan:** AI Sulit yang memakai pelacak, dan mode latihan.
+- **Dikerjakan:** (1) `pelacak.ts` mendapat `ambilTangan(acak)`: dugaan tangan tiga pemain lain yang SERAGAM di antara semua pembagian cocok (penarikan kartu demi kartu dengan bobot dari tabel pemrograman dinamis). (2) `src/ai-sulit.ts`: untuk tiap dugaan, tiap langkah legal dicoba lalu kocokan dimainkan sampai selesai oleh empat AI Sedang; langkah dengan rata-rata (markah tambahan lawan - tim sendiri) terbaik dipilih. Bawaan 60 dugaan. (3) Tingkat AI `sulit` aktif di menu. (4) Mode Latihan: pengaturan `mode`; Latihan = pertandingan yang sama dengan Bantuan hitung selalu tampil dan tombol Saran (`saranManusia`: langkah terbaik AI Sulit, kartunya disorot, teks "Saran: kartu 2-4 di sisi kanan (ujung 4)"). (5) `demo/ai-sulit.ts` (`npm run demo:sulit`).
+- **Keputusan yang saya ambil (peta jalan hanya menulis "mode latihan"):** Latihan saya wujudkan sebagai pertandingan biasa ditambah Saran dan Bantuan hitung, bukan mode terpisah dengan aturan lain. Alasannya paling kecil risikonya dan memakai seluruh alur yang sudah teruji; mudah diganti bila Anda menginginkan bentuk lain (mis. kocokan tunggal tanpa target, atau ulang kocokan).
+- **Kekuatan (`npm run demo:sulit`, 200 partai, 60 dugaan, kursi ditukar):** Sulit lawan Sedang menang 152/200 (76,0%); Sulit lawan Mudah 180/200 (90,0%); cermin Sulit lawan Sulit 100/200 (50,0%). Pada pengukuran awal dengan 30 dugaan: 71%. Temuan penting: dengan 8 dugaan AI ini kira-kira setara Sedang (46% dari 100 partai), jadi banyak dugaan memang menentukan.
+- **Tes:** 12 tes baru (sampler: selalu cocok dan seragam terhadap brute force; Sulit: legal dan selesai di empat kursi, hanya memakai pandangan, deterministik, lebih kuat dari Sedang pada benih tetap; saran legal; tampilan Latihan dan Saran) dan gerbang 600 kocokan dengan AI Sulit lolos pemeriksa mandiri. Total 256 tes (sekitar 40 detik).
+- **Perbaikan yang ikut:** panel Bantuan hitung di zip sebelumnya mengubah tata letak ponsel (lawan jadi kolom samping yang menjepit rantai) karena aturan grid `.dengan-bantuan` menimpa aturan layar sempit; sudah diperbaiki dengan aturan layar sempit sendiri, dicek di 390 piksel.
+- **Belum:** Sulit hanya menyimulasikan satu kocokan (tidak mempertimbangkan skor partai, mis. sudah dekat 100); tidak memakai petunjuk dari pilihan langkah lawan; belum diuji dimainkan manusia sungguhan; di layar tinggi pendek, panel bantuan dan saran bisa tertutup tangan sampai halaman digulir.
+- **Berikutnya:** semua tahap peta jalan sudah selesai. Kandidat: pertimbangan skor partai di AI Sulit, bentuk lain mode Latihan, berkas yang ditunda (`CLAUDE.md`, `TECHSTACK.md`, `SKILSS.md`, `SECURITY.md`), uji di ponsel sungguhan.
+
+---
+
 ## 2026-10-30 | Tahap 5: pelacak kartu dan peluang, Bantuan hitung
 
 - **Tujuan:** pelacak kartu dan peluang kartu lawan, sebagai saklar Bantuan hitung untuk pemain dan fondasi AI Sulit (tahap 6).

@@ -195,3 +195,74 @@ test('state tidak konsisten (jumlah kartu tidak cocok) ditolak, bukan dihitung n
   const v = pandangan(kocokan, saya);
   assert.throws(() => buatPelacak({ ...v, jumlahKartu: [1, 1, 1, 5] }), /tidak sama/);
 });
+
+test('ambilTangan: selalu cocok (jumlah kartu, larangan angka, tangan sendiri, tanpa kartu ganda) dan deterministik', () => {
+  let diuji = 0;
+  for (let benih = 1; benih <= 30; benih++) {
+    for (const { kocokan, saya } of keadaanAkhir(benih, 21)) {
+      const v = pandangan(kocokan, saya);
+      const p = buatPelacak(v);
+      const tangan = p.ambilTangan(buatAcak(benih + diuji));
+      assert.deepEqual(tangan[saya], v.tangan);
+      const semua = new Set<string>();
+      for (const n of SEMUA) {
+        assert.equal(tangan[n].length, v.jumlahKartu[n], `benih ${benih}: jumlah kartu pemain ${n}`);
+        const dilarang = angkaTerlarang(v.riwayat, n);
+        for (const kartu of tangan[n]) {
+          assert.ok(!semua.has(kartu.id), `kartu ${kartu.id} ganda`);
+          semua.add(kartu.id);
+          if (n !== saya)
+            assert.ok(!dilarang.has(kartu.a) && !dilarang.has(kartu.b), `benih ${benih}: ${kartu.id} melanggar larangan pemain ${n}`);
+        }
+      }
+      assert.equal(semua.size, 28 - v.meja.rangkaian.length);
+      assert.deepEqual(p.ambilTangan(buatAcak(5)), p.ambilTangan(buatAcak(5)));
+      diuji++;
+      if (diuji % 6 === 0) break;
+    }
+  }
+  assert.ok(diuji > 100);
+});
+
+test('ambilTangan: seragam; frekuensi cocok dengan peluang tepat dan dengan brute force pada keadaan kecil', () => {
+  let diuji = 0;
+  for (let benih = 1; benih <= 80 && diuji < 4; benih++) {
+    for (const { kocokan, saya } of keadaanAkhir(benih, 6)) {
+      const v = pandangan(kocokan, saya);
+      const p = buatPelacak(v);
+      const lain = SEMUA.filter((n) => n !== saya);
+      const semua = bruteForce(
+        p.belumTerlihat,
+        lain.map((n) => v.jumlahKartu[n]),
+        lain.map((n) => angkaTerlarang(v.riwayat, n)),
+      );
+      if (semua.length < 3 || semua.length > 120) continue;
+      const jumlah = 30000;
+      const acak = buatAcak(benih);
+      const hitung = new Map<string, number>();
+      for (let i = 0; i < jumlah; i++) {
+        const t = p.ambilTangan(acak);
+        const kunci = lain
+          .map((n) =>
+            t[n]
+              .map((c) => c.id)
+              .sort()
+              .join(','),
+          )
+          .join('|');
+        hitung.set(kunci, (hitung.get(kunci) ?? 0) + 1);
+      }
+      assert.equal(hitung.size, semua.length, `benih ${benih}: semua pembagian harus pernah muncul`);
+      const harapan = jumlah / semua.length;
+      for (const [kunci, n] of hitung) {
+        assert.ok(
+          Math.abs(n - harapan) < 6 * Math.sqrt(harapan),
+          `benih ${benih}: pembagian ${kunci} muncul ${n}, harapan ${harapan.toFixed(0)}`,
+        );
+      }
+      diuji++;
+      break;
+    }
+  }
+  assert.ok(diuji >= 3, `hanya ${diuji} keadaan kecil diuji`);
+});

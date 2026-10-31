@@ -10,6 +10,7 @@ import type { HasilKocokan } from '../src/markah.ts';
 import { ada } from '../bantu/bantuan-tes.ts';
 import { jalankanGerbang, laporanMarkdown } from '../bantu/gerbang.ts';
 import { pilihLangkahSedang } from '../src/ai-sedang.ts';
+import { pilihLangkahSulit } from '../src/ai-sulit.ts';
 
 // Salinan masukan pemeriksa yang BISA DIUBAH, supaya tes dapat merusaknya dengan sengaja.
 type LangkahU =
@@ -246,3 +247,12 @@ test('gerbang dengan AI Sedang di keempat kursi: 1500 kocokan lolos pemeriksa ma
   assert.ok(s.kocokan >= 1500);
   assert.ok(s.partai > 10);
 });
+
+test('gerbang dengan AI Sulit di keempat kursi: 600 kocokan lolos pemeriksa mandiri tanpa pelanggaran', () => {
+  const s = jalankanGerbang({
+    jumlahKocokan: 600,
+    benihAwal: 77,
+    kebijakan: (state, acak) => pilihLangkahSulit(state, acak, { dugaan: 6 }),
+  });
+  assert.ok(s.kocokan >= 600);
+}, 60000);

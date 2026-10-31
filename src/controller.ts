@@ -6,7 +6,8 @@
 //
 // Pemain manusia selalu Selatan (nomor 0). Tiga pemain lain dikendalikan
 // komputer. Tingkat AI dipilih di pengaturan: Mudah bermain acak, Sedang
-// memakai penilaian langkah (ai-sedang.ts). Sulit menyusul di tahap 6.
+// memakai penilaian langkah (ai-sedang.ts), Sulit menebak kartu lawan dan menyimulasikan
+// langkah (ai-sulit.ts). Mode Latihan menambah tombol Saran (langkah terbaik menurut AI Sulit).
 
 import { SISI_KANAN } from './meja.ts';
 import type { Sisi } from './meja.ts';
@@ -20,6 +21,7 @@ import type { FormatPertandingan, Pertandingan } from './pertandingan.ts';
 import { pilihLangkahAcak } from './simulasi.ts';
 import type { Kebijakan } from './simulasi.ts';
 import { pilihLangkahSedang } from './ai-sedang.ts';
+import { nilaiLangkahSulit, pilihLangkahSulit } from './ai-sulit.ts';
 
 export const PEMAIN_MANUSIA: NomorPemain = 0;
 
@@ -45,7 +47,11 @@ export function adaLangkahOtomatis(partai: Partai): boolean {
 }
 
 /** Pemilih langkah untuk tiap tingkat AI. */
-const KEBIJAKAN_AI: Readonly<Record<TingkatAi, Kebijakan>> = { mudah: pilihLangkahAcak, sedang: pilihLangkahSedang };
+const KEBIJAKAN_AI: Readonly<Record<TingkatAi, Kebijakan>> = {
+  mudah: pilihLangkahAcak,
+  sedang: pilihLangkahSedang,
+  sulit: (state, acak) => pilihLangkahSulit(state, acak),
+};
 
 /**
  * Menjalankan SATU langkah otomatis. Komputer bermain sesuai tingkat AI (bawaan Mudah = acak);
@@ -85,20 +91,44 @@ export function mainkanManusia(partai: Partai, idKartu: string, sisi: Sisi): Par
   return mainkanPartai(partai, PEMAIN_MANUSIA, kartu, sisi);
 }
 
+/** Saran langkah untuk manusia: kartu dan sisi yang dinilai terbaik oleh AI Sulit. */
+export interface Saran {
+  readonly kartu: Kartu;
+  readonly sisi: Sisi;
+}
+
+/**
+ * Saran untuk giliran manusia (mode Latihan). Memakai AI Sulit, jadi hanya "melihat" tangan Anda
+ * sendiri dan fakta di meja. Null bila sekarang bukan giliran Anda memilih kartu.
+ */
+export function saranManusia(partai: Partai, acak: FungsiAcak): Saran | null {
+  if (!menungguManusia(partai) || partai.status !== STATUS_BERJALAN) return null;
+  const terbaik = nilaiLangkahSulit(partai.kocokan, acak)[0];
+  if (terbaik === undefined) return null;
+  // Bila kedua ujung sama, tampilan hanya menawarkan satu sisi; saran mengikutinya.
+  const opsi = pilihanKartu(partai, terbaik.kartu.id);
+  if (opsi === null) return null;
+  const sisi = opsi.sisi.find((s) => s === terbaik.sisi) ?? opsi.sisi[0];
+  return sisi === undefined ? null : { kartu: terbaik.kartu, sisi };
+}
+
 // ---------------------------------------------------------------------------
 // Alur aplikasi: menu -> pertandingan (partai demi partai) -> hasil akhir
 // ---------------------------------------------------------------------------
 //
 // State aplikasi: { pengaturan, pertandingan }
-//   pengaturan:  { format: 'bo3' | 'bo5', ai: 'mudah' | 'sedang', bantuan: boolean }
+//   pengaturan:  { format: 'bo3' | 'bo5', ai: 'mudah' | 'sedang' | 'sulit', bantuan: boolean, mode: 'pertandingan' | 'latihan' }
 //   pertandingan: null (sedang di menu) atau state pertandingan (lihat pertandingan.ts)
 //
 // Layar yang tampil diturunkan dari state itu, bukan disimpan terpisah, supaya
 // keduanya tidak bisa berselisih.
 
 export const FORMAT_TERSEDIA = [FORMAT_BO3, FORMAT_BO5] as const;
-/** Tingkat AI yang sudah ada. 'sulit' menyusul di tahap 6. */
-export const AI_TERSEDIA = ['mudah', 'sedang'] as const;
+/** Tingkat AI yang tersedia. */
+export const AI_TERSEDIA = ['mudah', 'sedang', 'sulit'] as const;
+/** Mode: pertandingan biasa, atau latihan (pertandingan yang sama dengan Bantuan hitung dan tombol Saran). */
+export const MODE_TERSEDIA = ['pertandingan', 'latihan'] as const;
+export type ModeMain = (typeof MODE_TERSEDIA)[number];
 export type TingkatAi = (typeof AI_TERSEDIA)[number];
 
 export interface Pengaturan {
@@ -106,6 +136,7 @@ export interface Pengaturan {
   readonly ai: TingkatAi;
   /** Bantuan hitung: panel kartu tersisa dan peluang di meja (tahap 5). */
   readonly bantuan: boolean;
+  readonly mode: ModeMain;
 }
 
 /** State seluruh aplikasi: pengaturan, dan pertandingan (null bila di menu). */
@@ -116,7 +147,12 @@ export interface Aplikasi {
 
 export type Layar = 'menu' | 'meja' | 'partai-selesai' | 'akhir';
 
-export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({ format: FORMAT_BO3, ai: 'mudah', bantuan: false });
+export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({ format: FORMAT_BO3, ai: 'mudah', bantuan: false, mode: 'pertandingan' });
+
+/** Apakah nilai ini mode main yang tersedia? */
+export function adalahMode(nilai: unknown): nilai is ModeMain {
+  return MODE_TERSEDIA.some((m) => m === nilai);
+}
 
 /** Apakah nilai ini tingkat AI yang tersedia? */
 export function adalahAi(nilai: unknown): nilai is TingkatAi {
@@ -137,10 +173,12 @@ export function rapikanPengaturan(mentah: unknown): Pengaturan {
   const format = 'format' in sumber ? sumber.format : undefined;
   const ai = 'ai' in sumber ? sumber.ai : undefined;
   const bantuan = 'bantuan' in sumber ? sumber.bantuan : undefined;
+  const mode = 'mode' in sumber ? sumber.mode : undefined;
   return {
     format: adalahFormatTersimpan(format) ? format : PENGATURAN_BAWAAN.format,
     ai: adalahAi(ai) ? ai : PENGATURAN_BAWAAN.ai,
     bantuan: typeof bantuan === 'boolean' ? bantuan : PENGATURAN_BAWAAN.bantuan,
+    mode: adalahMode(mode) ? mode : PENGATURAN_BAWAAN.mode,
   };
 }
 

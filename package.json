@@ -1,6 +1,6 @@
 {
   "name": "gaple",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "Game gaple 2vs2 berbasis web (pertandingan, partai, kocokan)",
   "type": "module",
   "private": true,
@@ -14,6 +14,7 @@
     "demo": "node demo/potongan-5.ts",
     "gerbang": "node demo/potongan-6.ts",
     "demo:ai": "node demo/ai-sedang.ts",
+    "demo:sulit": "node demo/ai-sulit.ts",
     "demo:4": "node demo/potongan-4.ts",
     "demo:3": "node demo/potongan-3.ts",
     "demo:2": "node demo/potongan-2.ts",

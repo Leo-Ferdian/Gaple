@@ -66,8 +66,12 @@ test('ubahPengaturan merapikan nilai dan tidak mengubah state lama', () => {
   assert.equal(a.pengaturan.format, 'bo3');
   // @ts-expect-error sengaja salah: format tidak dikenal harus diganti bawaan
   assert.equal(ubahPengaturan(a, { format: 'bo9' }).pengaturan.format, 'bo3');
-  // @ts-expect-error sengaja salah: tingkat AI belum tersedia
-  assert.equal(ubahPengaturan(a, { ai: 'sulit' }).pengaturan.ai, 'mudah');
+  // @ts-expect-error sengaja salah: tingkat AI tidak dikenal
+  assert.equal(ubahPengaturan(a, { ai: 'dewa' }).pengaturan.ai, 'mudah');
+  assert.equal(ubahPengaturan(a, { ai: 'sulit' }).pengaturan.ai, 'sulit');
+  // @ts-expect-error sengaja salah: mode tidak dikenal
+  assert.equal(ubahPengaturan(a, { mode: 'turnamen' }).pengaturan.mode, 'pertandingan');
+  assert.equal(ubahPengaturan(a, { mode: 'latihan' }).pengaturan.mode, 'latihan');
   assert.equal(ubahPengaturan(a, { ai: 'sedang' }).pengaturan.ai, 'sedang');
   assert.equal(ubahPengaturan(a, { bantuan: true }).pengaturan.bantuan, true);
 });
@@ -142,12 +146,14 @@ test('nomor partai naik tiap partai selesai dan poin dibawa ke partai berikutnya
 // ---------------------------------------------------------------------------
 
 test('menu: format dan lawan terpilih sesuai pengaturan, tingkat yang belum ada dinonaktifkan', () => {
-  const html = htmlMenu({ format: 'bo5', ai: 'mudah', bantuan: false });
+  const html = htmlMenu({ format: 'bo5', ai: 'mudah', bantuan: false, mode: 'pertandingan' });
   assert.match(html, /name="format" value="bo5" checked/);
   assert.doesNotMatch(html, /name="format" value="bo3" checked/);
   assert.match(html, /name="ai" value="mudah" checked/);
   assert.match(html, /name="ai" value="sedang"(?! disabled)/);
-  assert.match(html, /name="ai" value="sulit" disabled/);
+  assert.match(html, /name="ai" value="sulit"(?! disabled)/);
+  assert.match(html, /name="mode" value="pertandingan" checked/);
+  assert.match(htmlMenu({ format: 'bo3', ai: 'mudah', bantuan: false, mode: 'latihan' }), /name="mode" value="latihan" checked/);
   assert.match(html, /data-aksi="main"/);
   assert.match(html, /Aturan singkat/);
 });

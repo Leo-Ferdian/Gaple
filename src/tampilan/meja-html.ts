@@ -9,7 +9,7 @@
 
 import { NAMA_PEMAIN, kartuLegalPemain } from '../kocokan.ts';
 import { PEMAIN_MANUSIA } from '../controller.ts';
-import type { PilihanManusia } from '../controller.ts';
+import type { PilihanManusia, Saran } from '../controller.ts';
 import type { Kartu, NomorPemain, NomorTim } from '../engine.ts';
 import type { Sisi } from '../meja.ts';
 import type { Partai, PartaiBerjalan, PartaiRingkasan } from '../partai.ts';
@@ -36,7 +36,7 @@ function urutkanTangan(tangan: readonly Kartu[]): Kartu[] {
   return [...tangan].sort((x, y) => x.a - y.a || x.b - y.b);
 }
 
-function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean): string {
+function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, latihan: boolean): string {
   const batang = (tim: NomorTim): string => {
     const persen = Math.min(100, Math.round((100 * partai.markah[tim]) / BATAS_MARKAH));
     return (
@@ -48,7 +48,7 @@ function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean): st
   return (
     `<header class="bar">` +
     `<div class="markah-dua" aria-label="Markah, batas ${BATAS_MARKAH}">${batang(0)}${batang(1)}</div>` +
-    `<div class="info">Poin ${partai.poin[0]}-${partai.poin[1]} · Partai ${nomorPartai} · Kocokan ${partai.nomorKocokan}</div>` +
+    `<div class="info">${latihan ? 'Latihan · ' : ''}Poin ${partai.poin[0]}-${partai.poin[1]} · Partai ${nomorPartai} · Kocokan ${partai.nomorKocokan}</div>` +
     `<div class="aksi"><button type="button" data-aksi="jeda">${dijeda ? 'Lanjut' : 'Jeda'}</button><button type="button" data-aksi="menu">Menu</button></div>` +
     `</header>`
   );
@@ -128,6 +128,16 @@ function htmlBantuan(kocokan: StateKocokan): string {
   );
 }
 
+/** Tombol Saran dan teks saran (mode Latihan). Hanya pada giliran Anda memilih kartu. */
+function htmlSaran(partai: PartaiBerjalan, saran: Saran | null, sedangMemilihSisi: boolean): string {
+  const { kocokan } = partai;
+  if (kocokan.giliran !== PEMAIN_MANUSIA || kartuLegalPemain(kocokan, PEMAIN_MANUSIA).length === 0 || sedangMemilihSisi) return '';
+  if (saran === null) return `<div class="saran-baris"><button type="button" data-aksi="saran">Saran</button></div>`;
+  const ujung = saran.sisi === 'kiri' ? kocokan.meja.ujungKiri : saran.sisi === 'kanan' ? kocokan.meja.ujungKanan : null;
+  const tempat = saran.sisi === 'awal' || ujung === null ? 'di meja' : `di sisi ${saran.sisi} (ujung ${ujung})`;
+  return `<div class="saran-baris"><p class="teks-saran" role="status">Saran: kartu ${saran.kartu.a}-${saran.kartu.b} ${tempat}</p></div>`;
+}
+
 function htmlPilihSisi(kocokan: StateKocokan, pilihan: PilihanManusia): string {
   const tombol = pilihan.sisi.map((sisi) => `<button type="button" data-sisi="${sisi}">${labelSisi(kocokan, sisi)}</button>`).join('');
   return `<div class="pilih-sisi" role="group" aria-label="Pilih sisi">${tombol}<button type="button" data-sisi="batal" class="batal">Batal</button></div>`;
@@ -152,14 +162,14 @@ function htmlRingkasan(partai: PartaiRingkasan): string {
   );
 }
 
-function htmlTangan(partai: PartaiTampil, terpilih: string | null): string {
+function htmlTangan(partai: PartaiTampil, terpilih: string | null, saranId: string | null): string {
   const { kocokan } = partai;
   const giliranAnda = partai.status === 'berjalan' && kocokan.giliran === PEMAIN_MANUSIA;
   const legal = new Set(kartuLegalPemain(kocokan, PEMAIN_MANUSIA).map((p) => p.kartu.id));
   const tombol = urutkanTangan(kocokan.tangan[PEMAIN_MANUSIA])
     .map((kartu) => {
       const aktif = giliranAnda && legal.has(kartu.id);
-      const kelas = `kartu-tangan ${aktif ? 'legal' : 'redup'}${kartu.id === terpilih ? ' terpilih' : ''}`;
+      const kelas = `kartu-tangan ${aktif ? 'legal' : 'redup'}${kartu.id === terpilih ? ' terpilih' : ''}${aktif && kartu.id === saranId ? ' saran' : ''}`;
       return `<button type="button" class="${kelas}" data-kartu="${kartu.id}"${aktif ? '' : ' disabled'}>${svgKartu(kartu.a, kartu.b, ARAH_TEGAK)}</button>`;
     })
     .join('');
@@ -174,29 +184,42 @@ export interface OpsiMeja {
   readonly areaRangkaian?: Area;
   /** Tampilkan panel bantuan hitung (kartu tersisa dan peluang). */
   readonly bantuan?: boolean;
+  /** Mode Latihan: Bantuan hitung selalu tampil dan ada tombol Saran. */
+  readonly latihan?: boolean;
+  /** Saran langkah yang sedang ditampilkan (mode Latihan). */
+  readonly saran?: Saran | null;
 }
 
 /** Meja untuk partai berstatus 'berjalan' atau 'ringkasan'. */
 export function htmlMeja(
   partai: Partai,
-  { nomorPartai = 1, dijeda = false, pilihan = null, areaRangkaian = AREA_LUAS, bantuan = false }: OpsiMeja = {},
+  {
+    nomorPartai = 1,
+    dijeda = false,
+    pilihan = null,
+    areaRangkaian = AREA_LUAS,
+    bantuan = false,
+    latihan = false,
+    saran = null,
+  }: OpsiMeja = {},
 ): string {
   if (partai.kocokan === null) throw new Error('Tidak ada kocokan yang bisa digambar');
   const { kocokan } = partai;
-  const tampilBantuan = bantuan && partai.status === 'berjalan';
+  const tampilBantuan = (bantuan || latihan) && partai.status === 'berjalan';
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}">` +
-    htmlBar(partai, nomorPartai, dijeda) +
+    htmlBar(partai, nomorPartai, dijeda, latihan) +
     htmlLawan(kocokan, UTARA, 'utara') +
     htmlLawan(kocokan, BARAT, 'barat') +
     `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian)}` +
     `<p class="status" role="status">${teksStatus(partai)}<span class="terakhir">${teksLangkahTerakhir(kocokan)}</span></p>` +
     (pilihan ? htmlPilihSisi(kocokan, pilihan) : '') +
+    (latihan && partai.status === 'berjalan' ? htmlSaran(partai, saran, pilihan !== null) : '') +
     (partai.status === 'ringkasan' ? htmlRingkasan(partai) : '') +
     `</section>` +
     (tampilBantuan ? htmlBantuan(kocokan) : '') +
     htmlLawan(kocokan, TIMUR, 'timur') +
-    htmlTangan(partai, pilihan?.kartu.id ?? null) +
+    htmlTangan(partai, pilihan?.kartu.id ?? null, saran?.kartu.id ?? null) +
     `</div>`
   );
 }
