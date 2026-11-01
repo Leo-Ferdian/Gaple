@@ -345,8 +345,8 @@ for (const [nama, area] of kasusArea) {
 
 test('rata-rata skala dijaga (kartu tidak cepat mengecil walau posisinya terkunci)', () => {
   const batas: readonly (readonly [string, Area, number])[] = [
-    ['luas', AREA_LUAS, 0.6],
-    ['sempit', AREA_SEMPIT, 0.5],
+    ['luas', AREA_LUAS, 0.75],
+    ['sempit', AREA_SEMPIT, 0.6],
   ];
   for (const [nama, area, minimal] of batas) {
     let total = 0;
@@ -420,4 +420,28 @@ test('double di sudut tetap melintang di tengah sumbu baris, rantai lanjut dari 
     }
   }
   assert.ok(ada > 0);
+});
+
+test('balak selalu melintang, di segmen mana pun; satu-satunya pengecualian: balak yang menjadi kartu belokan siku', () => {
+  let ada = 0;
+  for (const area of [AREA_LUAS, AREA_SEMPIT]) {
+    for (let benih = 1; benih <= 80; benih++) {
+      for (const { rangkaian, indeks } of mejaDariKocokan(benih)) {
+        const { kartu } = tataRantai(rangkaian, { area, indeksAnchor: indeks });
+        for (const sisi of ['kiri', 'kanan'] as const) {
+          const urut = kartu.filter((k) => k.sisi === sisi);
+          if (sisi === 'kiri') urut.reverse();
+          urut.forEach((k, i) => {
+            if (!k.double) return;
+            ada++;
+            const mendatar = k.arah === 'timur' || k.arah === 'barat';
+            const melintang = mendatar ? k.rotasi % 180 === 90 : k.rotasi % 180 === 0;
+            const belokSiku = i > 0 && urut[i - 1]?.arah !== k.arah;
+            assert.ok(melintang || belokSiku, `benih ${benih}: balak ${k.id} tidak melintang di tengah segmen`);
+          });
+        }
+      }
+    }
+  }
+  assert.ok(ada > 100);
 });

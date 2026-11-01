@@ -32,6 +32,25 @@ const PILIHAN_AI: readonly Pilihan[] = [
   { nilai: 'sulit', nama: 'Sulit' },
 ];
 
+const namaDari = (pilihan: readonly Pilihan[], nilai: string): string => pilihan.find((p) => p.nilai === nilai)?.nama ?? nilai;
+
+/** Ringkasan pilihan di dekat tombol Main, mis. "Pertandingan, Terbaik dari 3, lawan Sedang". */
+export function teksRingkasPilihan(pengaturan: Pengaturan): string {
+  return `${namaDari(PILIHAN_MODE, pengaturan.mode)} · ${namaDari(PILIHAN_FORMAT, pengaturan.format)} · Lawan ${namaDari(PILIHAN_AI, pengaturan.ai)}`;
+}
+
+/** Denah duduk: Anda di selatan, Utara mitra Anda, Barat dan Timur lawan. */
+function htmlDenah(): string {
+  return (
+    `<figure class="denah" role="img" aria-label="Denah duduk: Anda di selatan, Utara mitra Anda, Barat dan Timur lawan">` +
+    `<span class="kursi utara">Utara<small>mitra</small></span>` +
+    `<span class="kursi barat lawan">Barat<small>lawan</small></span>` +
+    `<span class="kursi timur lawan">Timur<small>lawan</small></span>` +
+    `<span class="kursi selatan">Anda</span>` +
+    `</figure>`
+  );
+}
+
 const teksPoin = (poin: Markah): string => `Kita ${poin[0]} - ${poin[1]} Lawan`;
 
 function radio(nama: string, pilihan: readonly Pilihan[], terpilih: string, aktif: (nilai: string) => boolean): string {
@@ -74,8 +93,10 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label>` +
     `<label class="pilihan"><input type="checkbox" name="suara"${pengaturan.suara ? ' checked' : ''}> Efek suara</label></fieldset>` +
     `</div>` +
-    `<button type="button" class="utama" data-aksi="main">Main</button>` +
-    `<details class="aturan"><summary>Aturan singkat</summary><ul>${ATURAN.map((a) => `<li>${a}</li>`).join('')}</ul></details>` +
+    `<div class="mulai">${htmlDenah()}<div class="mulai-aksi"><p class="ringkas-pilihan">${teksRingkasPilihan(pengaturan)}</p>` +
+    `<button type="button" class="utama" data-aksi="main">Main</button></div></div>` +
+    (pengaturan.pernahMain ? '' : `<p class="saran-awal">Baru pertama kali? Pilih mode Latihan: ada tombol Saran dan Bantuan hitung.</p>`) +
+    `<details class="aturan"${pengaturan.pernahMain ? '' : ' open'}><summary>Cara bermain</summary><ul>${ATURAN.map((a) => `<li>${a}</li>`).join('')}</ul></details>` +
     `</div>`
   );
 }
@@ -99,13 +120,24 @@ export function htmlPartaiSelesai(pertandingan: Pertandingan): string {
   );
 }
 
+/** Konfeti berupa titik kartu yang jatuh; posisi dan waktu ditentukan dari nomor urut (tanpa acak). */
+function htmlKonfeti(): string {
+  return Array.from({ length: 30 }, (_, i) => {
+    const kiri = (i * 37 + 11) % 100;
+    const tunda = ((i * 17) % 24) / 10;
+    const durasi = 3 + (i % 5) * 0.5;
+    return `<span style="left:${kiri}%;animation-delay:${tunda}s;animation-duration:${durasi}s"></span>`;
+  }).join('');
+}
+
 export function htmlAkhir(pertandingan: Pertandingan): string {
   const juara = pertandingan.juara;
   const baris = pertandingan.riwayatPartai
     .map((r) => `<li>Partai ${r.nomor}: markah ${r.markahAkhir[0]} - ${r.markahAkhir[1]}, menang ${NAMA_TIM[r.menang]}</li>`)
     .join('');
   return (
-    `<div class="meja layar akhir">` +
+    `<div class="meja layar akhir${juara === 0 ? ' menang' : ''}">` +
+    (juara === 0 ? `<div class="konfeti" aria-hidden="true">${htmlKonfeti()}</div>` : '') +
     `<h2>${juara === 0 ? 'Tim Anda juara!' : 'Lawan juara.'}</h2>` +
     `<p class="poin">${teksPoin(pertandingan.poin)}</p>` +
     `<ol class="riwayat">${baris}</ol>` +

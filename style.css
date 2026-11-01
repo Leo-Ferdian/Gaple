@@ -521,13 +521,12 @@ button:focus-visible {
 }
 .layar fieldset {
   margin: 0;
-  border: 0;
+  border: 1px solid var(--garis);
   border-radius: 6px;
-  padding: 10px 12px 12px;
+  padding: 6px 12px 12px;
   min-width: 0;
   text-align: left;
   background: rgba(0, 0, 0, 0.26);
-  box-shadow: inset 0 0 0 1px var(--garis);
 }
 .layar legend {
   padding: 0 6px;
@@ -779,4 +778,468 @@ button:focus-visible {
       'tangan tangan tangan';
     grid-template-rows: auto auto 1fr auto auto;
   }
+}
+
+/* ======================================================================
+   Umpan balik dan alur main (PC): giliran, kartu meluncur, bagi, markah, dialog
+   ====================================================================== */
+.sr-saja {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* penanda giliran: lampu menyala di kursi yang sedang jalan */
+.lawan {
+  position: relative;
+  transition:
+    color 0.2s,
+    text-shadow 0.2s;
+}
+.lawan.giliran {
+  color: var(--aksen);
+  text-shadow: 0 0 10px rgba(242, 184, 75, 0.7);
+}
+.lawan.giliran .kartu {
+  filter: drop-shadow(0 0 6px rgba(242, 184, 75, 0.6)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+.tangan.giliran::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(70%, 520px);
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--aksen), transparent);
+  box-shadow: 0 0 14px rgba(242, 184, 75, 0.8);
+  animation: napas 1.8s ease-in-out infinite;
+}
+.tangan {
+  /* sticky sudah memberi konteks penempatan untuk ::before */
+  position: sticky;
+}
+.berpikir::after {
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: titik-tiga 1.2s steps(4, end) infinite;
+}
+@keyframes titik-tiga {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75%,
+  100% {
+    content: '...';
+  }
+}
+@keyframes napas {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* kartu yang baru dimainkan meluncur dari kursi pemainnya */
+.letak[data-baru] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: meluncur 0.5s cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
+}
+.letak[data-dari='selatan'] {
+  --dx: 0px;
+  --dy: 300px;
+}
+.letak[data-dari='utara'] {
+  --dx: 0px;
+  --dy: -300px;
+}
+.letak[data-dari='barat'] {
+  --dx: -420px;
+  --dy: 0px;
+}
+.letak[data-dari='timur'] {
+  --dx: 420px;
+  --dy: 0px;
+}
+@keyframes meluncur {
+  from {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1.5) rotate(-10deg);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+/* kocokan baru: kartu dibagi satu per satu */
+.bagi-baru .kartu-tangan {
+  animation: bagi-tangan 0.5s cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
+}
+.bagi-baru .lipatan {
+  animation: bagi-lawan 0.4s ease-out backwards;
+}
+.bagi-baru .kartu-tangan:nth-child(1) {
+  animation-delay: 0s;
+}
+.bagi-baru .kartu-tangan:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.bagi-baru .kartu-tangan:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.bagi-baru .kartu-tangan:nth-child(4) {
+  animation-delay: 0.21s;
+}
+.bagi-baru .kartu-tangan:nth-child(5) {
+  animation-delay: 0.28s;
+}
+.bagi-baru .kartu-tangan:nth-child(6) {
+  animation-delay: 0.35s;
+}
+.bagi-baru .kartu-tangan:nth-child(7) {
+  animation-delay: 0.42s;
+}
+.bagi-baru .lipatan:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.bagi-baru .lipatan:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.bagi-baru .lipatan:nth-child(3) {
+  animation-delay: 0.19s;
+}
+.bagi-baru .lipatan:nth-child(4) {
+  animation-delay: 0.26s;
+}
+.bagi-baru .lipatan:nth-child(5) {
+  animation-delay: 0.33s;
+}
+.bagi-baru .lipatan:nth-child(6) {
+  animation-delay: 0.4s;
+}
+.bagi-baru .lipatan:nth-child(7) {
+  animation-delay: 0.47s;
+}
+@keyframes bagi-tangan {
+  from {
+    opacity: 0;
+    transform: translateY(-160px) rotate(-8deg) scale(0.7);
+  }
+}
+@keyframes bagi-lawan {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+  }
+}
+
+/* markah bertambah: +N muncul di papan kapur */
+.markah {
+  position: relative;
+}
+.markah .tambah {
+  position: absolute;
+  right: -6px;
+  top: -9px;
+  font-family: var(--slab);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--aksen);
+  text-shadow: 0 0 8px rgba(242, 184, 75, 0.7);
+  animation: tambah 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
+}
+@keyframes tambah {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.5);
+  }
+}
+.markah .angka {
+  animation: denyut 0.6s ease-out backwards;
+}
+@keyframes denyut {
+  30% {
+    transform: scale(1.18);
+  }
+}
+
+/* ringkasan kocokan: cap bonus */
+.ringkasan {
+  position: relative;
+}
+.cap-bonus {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 2px 14px;
+  border: 3px solid var(--aksen);
+  border-radius: 4px;
+  color: var(--aksen);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  transform: rotate(-4deg);
+  animation: cap 0.5s cubic-bezier(0.3, 1.6, 0.4, 1) 0.15s backwards;
+}
+@keyframes cap {
+  from {
+    opacity: 0;
+    transform: rotate(-4deg) scale(2.4);
+  }
+}
+
+/* dialog jeda dan konfirmasi keluar */
+.meja {
+  position: relative;
+}
+.tirai {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 20, 16, 0.72);
+  backdrop-filter: blur(2px);
+  animation: muncul 0.2s ease-out backwards;
+}
+.dialog {
+  min-width: min(90%, 360px);
+  padding: 22px 28px 24px;
+  text-align: center;
+  color: var(--kapur);
+  background: var(--tekstur), var(--papan);
+  background-blend-mode: soft-light, normal;
+  border: 6px solid var(--kayu-terang);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.6),
+    0 14px 40px rgba(0, 0, 0, 0.6);
+  animation: muncul-naik 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.1) backwards;
+}
+.dialog h2 {
+  margin: 0 0 6px;
+  font-family: var(--slab);
+  color: var(--aksen);
+}
+.dialog p {
+  margin: 0 0 16px;
+  color: var(--teks-redup);
+}
+.dialog button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid var(--kayu-gelap);
+  border-bottom-width: 3px;
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
+  color: var(--teks);
+  cursor: pointer;
+}
+.dialog button.utama {
+  border-color: var(--aksen-tua);
+  background: linear-gradient(#f7c767, var(--aksen));
+  color: var(--kayu-gelap);
+  font-family: var(--slab);
+  font-weight: 700;
+}
+@keyframes muncul {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes muncul-naik {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+}
+
+/* menu: denah duduk, ringkasan pilihan, pemain baru */
+.mulai {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.mulai-aksi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ringkas-pilihan {
+  margin: 0;
+  font-family: var(--slab);
+  color: var(--teks-redup);
+}
+.saran-awal {
+  margin: 0;
+  max-width: 460px;
+  padding: 8px 14px;
+  border-left: 4px solid var(--aksen);
+  background: rgba(0, 0, 0, 0.26);
+  text-align: left;
+  color: var(--teks);
+}
+.denah {
+  display: grid;
+  grid-template-columns: 70px 78px 70px;
+  grid-template-rows: 44px 34px 44px;
+  grid-template-areas:
+    '. utara .'
+    'barat tengah timur'
+    '. selatan .';
+  gap: 4px;
+  margin: 0;
+}
+.denah::before {
+  content: '';
+  grid-area: tengah;
+  border-radius: 50%;
+  background: radial-gradient(var(--meja), var(--meja-tua));
+  box-shadow: inset 0 0 0 2px var(--kayu);
+}
+.kursi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-family: var(--slab);
+  font-size: 0.85rem;
+  line-height: 1.1;
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 0 0 1px var(--garis);
+}
+.kursi small {
+  font-size: 0.7rem;
+  color: var(--teks-redup);
+}
+.kursi.utara {
+  grid-area: utara;
+}
+.kursi.barat {
+  grid-area: barat;
+}
+.kursi.timur {
+  grid-area: timur;
+}
+.kursi.selatan {
+  grid-area: selatan;
+}
+.kursi.selatan,
+.kursi.utara {
+  background: linear-gradient(#f7c767, var(--aksen));
+  color: var(--kayu-gelap);
+  box-shadow: none;
+}
+.kursi.utara small {
+  color: #5b3b12;
+}
+
+/* juara: titik kartu berjatuhan */
+.meja.akhir {
+  overflow: hidden;
+}
+.konfeti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.konfeti span {
+  position: absolute;
+  top: -20px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--aksen);
+  animation: jatuh linear infinite backwards;
+}
+.konfeti span:nth-child(3n) {
+  background: var(--kartu);
+}
+.konfeti span:nth-child(3n + 1) {
+  background: var(--punggung);
+  width: 10px;
+  height: 10px;
+}
+@keyframes jatuh {
+  to {
+    transform: translateY(105vh) rotate(540deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letak[data-baru],
+  .bagi-baru .kartu-tangan,
+  .bagi-baru .lipatan,
+  .markah .tambah,
+  .markah .angka,
+  .cap-bonus,
+  .tirai,
+  .dialog,
+  .tangan.giliran::before,
+  .berpikir::after {
+    animation: none;
+  }
+  .konfeti {
+    display: none;
+  }
+}
+
+/* PC: dengan panel bantuan semuanya muat di layar; tangan tidak lagi menempel agar tidak menutup panel */
+@media (min-width: 641px) {
+  .meja.dengan-bantuan .tangan {
+    position: relative;
+  }
+  .meja.dengan-bantuan .rangkaian-svg {
+    max-height: 38vh;
+  }
+}
+
+/* Garis bantu pengembangan (?garis=1 atau tombol G): batas meja */
+.rangkaian-svg.dengan-garis {
+  overflow: visible;
+  outline: 1px dashed rgba(255, 90, 90, 0.35);
+}
+.garis-bantu rect,
+.garis-bantu line {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+.gb-area {
+  stroke: #ff5a5a;
+  stroke-width: 2;
+  stroke-dasharray: 8 5;
+}
+.gb-margin {
+  stroke: var(--aksen);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.gb-kerangka {
+  stroke: #4aa3ff;
+  stroke-width: 1.5;
+  stroke-dasharray: 2 3;
+}
+.gb-sumbu {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
 }

@@ -31,7 +31,7 @@ export interface KonteksAudio {
   resume?(): unknown;
 }
 
-export type Efek = 'letak' | 'balak' | 'lewat' | 'menang' | 'kalah';
+export type Efek = 'letak' | 'balak' | 'lewat' | 'menang' | 'kalah' | 'giliran' | 'bonus' | 'bagi';
 
 interface Nada {
   readonly jenis: string;
@@ -56,6 +56,24 @@ const RESEP: Readonly<Record<Efek, readonly Nada[]>> = {
     { jenis: 'sine', frekuensi: 130, akhirFrekuensi: 80, mulai: 0, durasi: 0.1, keras: 0.55 },
     { jenis: 'sine', frekuensi: 130, akhirFrekuensi: 80, mulai: 0.17, durasi: 0.1, keras: 0.55 },
   ],
+  giliran: [
+    { jenis: 'sine', frekuensi: 880, mulai: 0, durasi: 0.28, keras: 0.22 },
+    { jenis: 'sine', frekuensi: 1320, mulai: 0.01, durasi: 0.2, keras: 0.08 },
+  ],
+  bonus: [
+    { jenis: 'triangle', frekuensi: 523, mulai: 0, durasi: 0.14, keras: 0.3 },
+    { jenis: 'triangle', frekuensi: 659, mulai: 0.09, durasi: 0.14, keras: 0.3 },
+    { jenis: 'triangle', frekuensi: 784, mulai: 0.18, durasi: 0.14, keras: 0.3 },
+    { jenis: 'triangle', frekuensi: 1047, mulai: 0.27, durasi: 0.3, keras: 0.34 },
+  ],
+  bagi: [0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42].map((mulai) => ({
+    jenis: 'triangle',
+    frekuensi: 240,
+    akhirFrekuensi: 110,
+    mulai,
+    durasi: 0.05,
+    keras: 0.25,
+  })),
   menang: [
     { jenis: 'triangle', frekuensi: 392, mulai: 0, durasi: 0.2, keras: 0.35 },
     { jenis: 'triangle', frekuensi: 494, mulai: 0.12, durasi: 0.2, keras: 0.35 },
@@ -71,7 +89,7 @@ const RESEP: Readonly<Record<Efek, readonly Nada[]>> = {
 
 export interface PemutarSuara {
   /** Memutar efek; tidak melakukan apa-apa bila suara mati atau konteks tidak tersedia. */
-  putar(efek: Efek): void;
+  putar(efek: Efek, tunda?: number): void;
   aktif(nilai: boolean): void;
 }
 
@@ -98,13 +116,13 @@ export function buatSuara(buatKonteks: () => KonteksAudio | null, aktifAwal = tr
     aktif(nilai) {
       nyala = nilai;
     },
-    putar(efek) {
+    putar(efek, tunda = 0) {
       if (!nyala) return;
       const ctx = ambilKonteks();
       if (ctx === null) return;
       try {
         ctx.resume?.();
-        const awal = ctx.currentTime;
+        const awal = ctx.currentTime + tunda;
         for (const n of RESEP[efek]) {
           const osilator = ctx.createOscillator();
           const gain = ctx.createGain();

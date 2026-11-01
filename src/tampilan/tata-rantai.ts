@@ -128,14 +128,20 @@ export const UKURAN_KARTU: UkuranKartu = Object.freeze({ panjang: PANJANG_KARTU,
 export const AREA_LUAS: Area = Object.freeze({ lebar: 1000, tinggi: 500 });
 export const AREA_SEMPIT: Area = Object.freeze({ lebar: 600, tinggi: 440 });
 
-const MARGIN = 8; // jarak minimal kartu dari tepi area
+export const MARGIN = 8; // jarak minimal kartu dari tepi area
 /** Skala awal kartu. Disisakan ruang (kartu tidak dimulai pada ukuran penuh) supaya rantai jarang perlu mengecil. */
 export const SKALA_AWAL = 0.8;
 /** Ukuran kerangka minimal (dalam panjang kartu, setengah lebar dan setengah tinggi). */
 const KERANGKA_MIN_LEBAR = 3;
-const KERANGKA_MIN_TINGGI = 3.5;
-/** Segmen tengah (antara belokan pertama dan kedua) berisi minimal sekian kartu sebelum boleh berbelok lagi. */
-const MIN_SEGMEN_TENGAH = 3;
+const KERANGKA_MIN_TINGGI = 2.5;
+/**
+ * Segmen tengah (antara belokan pertama dan kedua) harus cukup panjang sebelum boleh berbelok lagi:
+ * ujungnya sekurang-kurangnya sejauh satu panjang kartu (setengah balak baris utama + setengah balak baris terakhir)
+ * ditambah JARAK_BEBAS dan setengah lebar kartu belokan dari sumbu baris utama. Dengan begitu balak melintang di baris
+ * terakhir tidak pernah menempel pada balak baris utama, tanpa melihat ujung rantai yang lain.
+ * (Dua kartu biasa sudah cukup; kartu balak melintang di kolom pendek, jadi bisa perlu satu kartu lagi.)
+ */
+const JARAK_SEGMEN_MIN = PANJANG_KARTU + LEBAR_KARTU * 0.4 + LEBAR_KARTU / 2;
 const TOLERANSI = 0.01;
 const MAKS_BELOKAN = 2;
 /** Jarak bebas minimal antara dua kartu yang bukan tetangga di rantai, supaya tidak tampak bertumpuk. */
@@ -177,7 +183,7 @@ const bertumpuk = (p: Kotak, q: Kotak): boolean =>
 const dibesarkan = (k: Kotak, jarak: number): Kotak => ({ x1: k.x1 - jarak, x2: k.x2 + jarak, y1: k.y1 - jarak, y2: k.y2 + jarak });
 
 /** Kotak dalam kerangka maya: pusat anchor di (0, 0), kerangka selebar area / SKALA_AWAL. */
-interface Kerangka {
+export interface Kerangka {
   readonly setengahLebar: number;
   readonly setengahTinggi: number;
 }
@@ -218,7 +224,6 @@ function tataSatuSisi(
   let kursor: Titik = { ...kursorAwal }; // pusat sisi depan kartu terakhir
   let setengahMelintangSebelum = lebarAcrossAwal;
   let belok = 0;
-  let dalamSegmen = 0; // jumlah kartu di segmen sekarang
   const hasil: KartuTertata[] = [];
   const milik: Kotak[] = []; // kotak kartu di ujung ini, dari yang terdekat ke anchor
 
@@ -253,11 +258,13 @@ function tataSatuSisi(
         const pusat: Titik = { x: kursor.x + ARAH[arah].dx * (sepanjang / 2), y: kursor.y + ARAH[arah].dy * (sepanjang / 2) };
         return { sepanjang, pusat, kotak: kotakKartu(pusat, arah, m, ukuran) };
       };
-      let melintang = kartu.dobel && !sudut && !terakhir; // segmen terakhir (bisa panjang, kembali ke dekat anchor): double digambar sebagai kartu biasa
+      const melintang = kartu.dobel && !sudut;
       const { sepanjang, pusat, kotak } = coba(melintang);
 
-      // Double wajib hanya bila kartu sesudahnya juga masih wajib (kalau tidak, double itu jadi kartu sudut).
-      const wajib = belok === 1 && dalamSegmen + (melintang ? 1 : 0) < MIN_SEGMEN_TENGAH && !bentrok(kotak, milik);
+      // Segmen tengah belum cukup panjang: kartu diterima. Balak hanya bila kartu sesudahnya juga masih wajib
+      // (kalau tidak, balak itu menjadi kartu sudut).
+      const jarakSumbu = Math.abs(ARAH[arah].dx !== 0 ? kursor.x : kursor.y);
+      const wajib = belok === 1 && jarakSumbu + (melintang ? ukuran.lebar : 0) < JARAK_SEGMEN_MIN && !bentrok(kotak, milik);
       let terima = terakhir || wajib || (muatDenganCadangan(kotak, arah) && !bentrok(kotak, milik));
       if (terima && melintang && !terakhir && !wajib) {
         // Double hanya dipasang lurus bila sesudahnya masih muat satu kartu biasa.
@@ -273,7 +280,6 @@ function tataSatuSisi(
       if (terima) {
         milik.push(kotak);
         hasil.push({ kartu, pusat, arah, melintang });
-        dalamSegmen++;
         kursor = { x: kursor.x + ARAH[arah].dx * sepanjang, y: kursor.y + ARAH[arah].dy * sepanjang };
         setengahMelintangSebelum = (melintang ? ukuran.panjang : ukuran.lebar) / 2;
         break;
@@ -300,7 +306,6 @@ function tataSatuSisi(
           setengahMelintangSebelum = ukuran.lebar / 2;
           arah = arahBaru;
           belok++;
-          dalamSegmen = 1;
           break;
         }
       }
@@ -316,11 +321,18 @@ function tataSatuSisi(
       };
       arah = baru;
       belok++;
-      dalamSegmen = 0;
       sudut = true;
     }
   }
   return hasil;
+}
+
+/** Kerangka maya (setengah lebar dan tinggi, satuan kartu asli) untuk sebuah area. Juga dipakai garis bantu pengembangan. */
+export function kerangkaUntuk(area: Area, ukuran: UkuranKartu = UKURAN_KARTU): Kerangka {
+  return {
+    setengahLebar: Math.max((area.lebar / 2 - MARGIN) / SKALA_AWAL, KERANGKA_MIN_LEBAR * ukuran.panjang),
+    setengahTinggi: Math.max((area.tinggi / 2 - MARGIN) / SKALA_AWAL, KERANGKA_MIN_TINGGI * ukuran.panjang),
+  };
 }
 
 /** Tata letak dalam kerangka maya (anchor di 0,0), lalu kamera: skala seragam sampai semuanya muat di area. */
@@ -332,10 +344,7 @@ function susun(rangkaian: readonly Letak[], anchor: number, area: Area, ukuran: 
   const kotakAnchor = kotakKartu(asal, 'timur', dobelAnchor, ukuran);
   // Kerangka mengikuti area, tetapi tidak lebih kecil dari beberapa panjang kartu; area yang lebih
   // kecil ditangani kamera (kartu mengecil), bukan dengan membentuk rantai yang berbeda.
-  const kerangka: Kerangka = {
-    setengahLebar: Math.max((area.lebar / 2 - MARGIN) / SKALA_AWAL, KERANGKA_MIN_LEBAR * ukuran.panjang),
-    setengahTinggi: Math.max((area.tinggi / 2 - MARGIN) / SKALA_AWAL, KERANGKA_MIN_TINGGI * ukuran.panjang),
-  };
+  const kerangka = kerangkaUntuk(area, ukuran);
   const separuhSepanjang = (dobelAnchor ? ukuran.lebar : ukuran.panjang) / 2;
   const separuhMelintang = (dobelAnchor ? ukuran.panjang : ukuran.lebar) / 2;
 

@@ -27,8 +27,8 @@ const rusak = {
 
 test('simpan lalu muat mengembalikan pengaturan yang sama', () => {
   const s = penyimpananPalsu();
-  assert.equal(simpanPengaturan(s, { format: 'bo5', ai: 'sulit', bantuan: true, mode: 'latihan', suara: true }), true);
-  assert.deepEqual(muatPengaturan(s), { format: 'bo5', ai: 'sulit', bantuan: true, mode: 'latihan', suara: true });
+  assert.equal(simpanPengaturan(s, { format: 'bo5', ai: 'sulit', bantuan: true, mode: 'latihan', suara: true, pernahMain: false }), true);
+  assert.deepEqual(muatPengaturan(s), { format: 'bo5', ai: 'sulit', bantuan: true, mode: 'latihan', suara: true, pernahMain: false });
 });
 
 test('penyimpanan kosong menghasilkan pengaturan bawaan', () => {
@@ -56,8 +56,15 @@ test('data tersimpan yang rusak atau tidak masuk akal diganti nilai bawaan', () 
 
 test('hanya kunci yang dikenal yang dipertahankan', () => {
   const s = penyimpananPalsu({ [KUNCI_PENGATURAN]: JSON.stringify({ format: 'bo5', ai: 'mudah', rahasia: 'x', __proto__: { a: 1 } }) });
-  assert.deepEqual(Object.keys(muatPengaturan(s)).sort(), ['ai', 'bantuan', 'format', 'mode', 'suara']);
-  assert.deepEqual(Object.keys(rapikanPengaturan({ format: 'bo5', tambahan: 1 })).sort(), ['ai', 'bantuan', 'format', 'mode', 'suara']);
+  assert.deepEqual(Object.keys(muatPengaturan(s)).sort(), ['ai', 'bantuan', 'format', 'mode', 'pernahMain', 'suara']);
+  assert.deepEqual(Object.keys(rapikanPengaturan({ format: 'bo5', tambahan: 1 })).sort(), [
+    'ai',
+    'bantuan',
+    'format',
+    'mode',
+    'pernahMain',
+    'suara',
+  ]);
 });
 
 test('penyimpanan yang melarang akses tidak membuat game gagal', () => {

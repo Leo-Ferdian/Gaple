@@ -11,13 +11,44 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-01 | Segmen tengah lebih pendek dan garis bantu batas meja
+
+- **Tujuan:** kolom tengah (antara dua belokan) tidak perlu 3 kartu; belokan boleh lebih awal supaya ruang meja terpakai optimal. Plus garis sementara untuk melihat batas meja saat pengembangan.
+- **Dikerjakan:** (1) Aturan "minimal 3 kartu" diganti aturan jarak: ujung segmen tengah harus sejauh minimal satu panjang kartu + jarak bebas + setengah lebar dari sumbu baris utama. Dua kartu biasa sudah cukup (kartu balak melintang pendek di kolom, jadi kadang perlu satu lagi). Jarak ini menjamin balak melintang di baris terakhir tidak menempel pada balak baris utama, tanpa memeriksa ujung rantai lain. Akibatnya kartu kembali besar: skala rata-rata 0,79 (meja lebar) dan 0,65 (ponsel), naik dari sekitar 0,6. Kerangka minimal tinggi kembali 2,5 panjang kartu. (2) Garis bantu: `?garis=1` di alamat atau tombol G menampilkan batas area rantai (merah putus-putus), tepi dengan margin (kuning), kerangka tata letak (biru, bisa melewati area), dan sumbu tengah.
+- **Keputusan:** garis bantu hanya untuk pengembangan; tidak ada tombol di tampilan biasa. Ambang tes skala dikembalikan ke 0,75 (lebar) dan 0,6 (ponsel).
+- **Tes:** 1 tes baru (garis bantu); 272 tes lolos.
+- **Berikutnya:** menunggu perintah Anda.
+
+---
+
+## 2026-11-01 | Balak melintang di segmen terakhir dan catatan tema
+
+- **Tujuan:** balak di segmen terakhir rantai digambar sebagai kartu biasa (sejak v0.23.1), padahal balak harus melintang.
+- **Dikerjakan:** pengecualian itu dicabut. Sejak segmen tengah minimal 3 kartu (v0.24.0), baris terakhir selalu cukup jauh dari baris utama sehingga balak melintang tidak lagi menempel. Satu-satunya balak yang digambar sebagai kartu biasa adalah balak yang terpaksa menjadi kartu belokan siku (bila balak sudut melintang tidak muat). Tes baru memeriksa ini pada 160 kocokan di dua ukuran area.
+- **Catatan lanjutan (bersama rilis mobile):** tambahkan pengaturan tema (pilihan tampilan di menu, disimpan di pengaturan) saat tampilan ponsel dikerjakan.
+- **Tes:** 1 tes baru; 271 tes lolos.
+- **Berikutnya:** menunggu perintah Anda.
+
+---
+
+## 2026-11-01 | UX: alur main, umpan balik, menu dan onboarding (PC)
+
+- **Tujuan:** pengalaman bermain yang jelas dan terasa hidup di PC. Bentuk meja dan kartu tidak diubah.
+- **Dikerjakan:** (1) Alur main: kursi yang sedang giliran menyala (titik tiga bergerak saat komputer "berpikir"), garis lampu di atas tangan pada giliran Anda, kartu yang baru dimainkan meluncur dari kursi pemainnya, kartu dibagi satu per satu di awal kocokan. Papan ketik: Esc menutup dialog atau membatalkan pilihan kartu, panah kiri/kanan memilih sisi, P menjeda; fokus papan ketik tidak lagi hilang tiap gambar ulang. `window.confirm` diganti dialog di halaman (fokus awal pada pilihan aman), jeda juga memakai dialog. Pembaca layar mendapat pengumuman langkah lewat satu wilayah `#pengumuman` (bukan lagi seluruh meja yang diumumkan ulang). (2) Umpan balik: +markah muncul di papan kapur, cap bonus (double, triplet, quartet) di ringkasan kocokan, konfeti berupa titik kartu untuk juara, suara baru (bagi kartu, giliran Anda, bonus). (3) Menu: denah duduk (Anda, Utara mitra, Barat dan Timur lawan), ringkasan pilihan di dekat tombol Main, "Cara bermain" terbuka otomatis dan saran mode Latihan untuk pemain baru (pengaturan `pernahMain`). (4) Dengan Bantuan hitung di PC, rantai dibatasi 38% tinggi layar dan tangan tidak menempel, sehingga panel tidak tertutup.
+- **Keputusan:** semua animasi hanya CSS dan mati bila pengaturan sistem meminta gerak dikurangi; `terbaru` dan `bagi` hanya dikirim pada gambar tepat setelah kejadiannya supaya animasi tidak berulang saat gambar ulang. Tidak ada alat tambahan yang dipasang (sesuai pilihan Anda); verifikasi memakai Playwright yang sudah ada.
+- **Catatan lanjutan (mobile):** semua tambahan di atas belum dirapikan untuk ponsel (dialog, denah, papan kapur, animasi bagi); masuk daftar pekerjaan ponsel yang sudah dicatat pada entri sebelumnya.
+- **Tes:** 9 tes baru (`test/ux.test.ts`) dan penyesuaian tes lama; 270 tes lolos.
+- **Berikutnya:** menunggu penilaian Anda atas alur dan animasi.
+
+---
+
 ## 2026-11-01 | Tema warung malam (PC), suara, dan catatan mobile
 
 - **Tujuan:** tampilan PC yang tidak terlihat polos atau seperti templat; mobile ditunda.
 - **Dikerjakan:** (1) Tema "warung malam": meja beludru hijau bertekstur di bingkai kayu, lampu di atas, papan skor kapur untuk markah (angka besar dan garis kapur putus-putus sebagai kemajuan), tombol kayu dan tombol kuning lampu untuk aksi utama, huruf slab (Rockwell, bila tidak ada Georgia) untuk judul, skor, dan status. (2) Menu: papan nama kayu dengan dua kartu balak miring, pilihan menjadi ubin (yang terpilih menyala), dua kolom. (3) Layar akhir dan ringkasan kocokan memakai papan kapur. (4) Kartu diberi bayangan; kartu legal menyala kuning. (5) Efek suara disintesis dengan WebAudio (`src/suara.ts`, tanpa berkas audio): klak kartu, klak balak, dua ketukan saat lewat, nada menang dan kalah. Pengaturan baru `suara` (bawaan menyala) di menu dan tombol di bar.
 - **Keputusan:** font tanpa unduhan (tumpukan font sistem) supaya game tetap bisa dipakai luring dan tanpa dependensi. Cakupan sesuai pilihan Anda: menu, panel info dan skor, tipografi, warna, dan suara; bentuk meja dan kartu tidak diubah selain warna dan bayangan. Satu momen yang sengaja menjadi ciri: papan skor kapur.
 - **Catatan pengembangan lanjutan (mobile, setelah PC selesai):** tampilan ponsel sengaja belum dipoles. Yang perlu dikerjakan: bar skor dan papan kapur untuk layar sempit (sekarang tiga kolom lama), bingkai kayu yang lebih tipis, menu satu kolom, ukuran kartu di ponsel (kerangka khusus ponsel, lihat entri tata letak rantai), tombol berukuran ketuk, dan pengujian di perangkat nyata.
-- **Tes:** 3 tes suara (konteks palsu), 1 tes pengaturan suara; 261 tes lolos.
+- **Tes:** 3 tes suara (konteks palsu), 1 tes pengaturan suara; 270 tes lolos.
 - **Berikutnya:** menunggu penilaian Anda atas tampilan, lalu bagian meja dan kartu bila diinginkan.
 
 ---

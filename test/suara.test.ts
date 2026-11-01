@@ -33,6 +33,8 @@ test('suara: tiap efek memutar nada dan konteks dibuat sekali, baru saat efek pe
   suara.putar('menang');
   assert.equal(catatan.dibuat, 1);
   assert.equal(catatan.osilator, 2 + 2 + 4);
+  suara.putar('bagi', 0.3);
+  assert.equal(catatan.osilator, 2 + 2 + 4 + 7);
   assert.equal(catatan.mulai, catatan.osilator);
   assert.equal(catatan.berhenti, catatan.osilator);
 });

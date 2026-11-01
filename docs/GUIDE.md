@@ -563,3 +563,16 @@ Giliran searah jarum jam: 0, 1, 2, 3. Tim = nomor pemain mod 2.
 - **Tahap A (lewat):** JavaScript modul tanpa alat build.
 - **Tahap B (selesai, v0.18.0):** TypeScript + Vite + Vitest. Seluruh kode sudah `.ts`; bukti validasi di `docs/VALIDASI-MIGRASI.md`.
 - **Tahap C (ditunda):** server dan main online. Mesin dipakai ulang di server dengan pandangan per pemain.
+
+
+## 10. Papan ketik dan animasi (PC)
+
+| Masukan | Fungsi |
+| --- | --- |
+| Tab, Enter | Memilih kartu yang menyala; fokus dijaga setelah tiap langkah |
+| Panah kiri / kanan | Memilih sisi saat kartu bisa dipasang di dua ujung |
+| Esc | Menutup dialog atau membatalkan pilihan kartu |
+| P | Jeda dan lanjut |
+| G | Garis bantu pengembangan: batas area, margin, dan kerangka tata letak rantai (juga `?garis=1` di alamat) |
+
+Animasi (kartu meluncur, bagi kartu, markah, cap bonus, konfeti) hanya CSS di `style.css`; `main.ts` mengirim `terbaru` dan `bagi` ke `htmlMeja` hanya pada gambar tepat setelah kejadian. Pengaturan gerak dikurangi pada sistem mematikan semuanya.

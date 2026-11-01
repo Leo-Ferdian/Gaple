@@ -139,6 +139,8 @@ export interface Pengaturan {
   readonly mode: ModeMain;
   /** Efek suara (disintesis di peramban). */
   readonly suara: boolean;
+  /** Sudah pernah menekan Main (menu pemain baru membuka Cara bermain). */
+  readonly pernahMain: boolean;
 }
 
 /** State seluruh aplikasi: pengaturan, dan pertandingan (null bila di menu). */
@@ -155,6 +157,7 @@ export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({
   bantuan: false,
   mode: 'pertandingan',
   suara: true,
+  pernahMain: false,
 });
 
 /** Apakah nilai ini mode main yang tersedia? */
@@ -183,12 +186,14 @@ export function rapikanPengaturan(mentah: unknown): Pengaturan {
   const bantuan = 'bantuan' in sumber ? sumber.bantuan : undefined;
   const mode = 'mode' in sumber ? sumber.mode : undefined;
   const suara = 'suara' in sumber ? sumber.suara : undefined;
+  const pernahMain = 'pernahMain' in sumber ? sumber.pernahMain : undefined;
   return {
     format: adalahFormatTersimpan(format) ? format : PENGATURAN_BAWAAN.format,
     ai: adalahAi(ai) ? ai : PENGATURAN_BAWAAN.ai,
     bantuan: typeof bantuan === 'boolean' ? bantuan : PENGATURAN_BAWAAN.bantuan,
     mode: adalahMode(mode) ? mode : PENGATURAN_BAWAAN.mode,
     suara: typeof suara === 'boolean' ? suara : PENGATURAN_BAWAAN.suara,
+    pernahMain: typeof pernahMain === 'boolean' ? pernahMain : PENGATURAN_BAWAAN.pernahMain,
   };
 }
 
@@ -203,7 +208,7 @@ function mulaiPartaiDanBagi(pertandingan: Pertandingan, acak: FungsiAcak): Perta
 
 /** Menekan Main: pertandingan baru dengan kocokan pertama sudah dibagi. */
 export function mulaiPermainan(aplikasi: Aplikasi, acak: FungsiAcak): Aplikasi {
-  const pengaturan = rapikanPengaturan(aplikasi.pengaturan);
+  const pengaturan = { ...rapikanPengaturan(aplikasi.pengaturan), pernahMain: true };
   return { pengaturan, pertandingan: mulaiPartaiDanBagi(mulaiPertandingan(pengaturan.format), acak) };
 }
 
