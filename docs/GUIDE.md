@@ -576,3 +576,12 @@ Giliran searah jarum jam: 0, 1, 2, 3. Tim = nomor pemain mod 2.
 | G | Garis bantu pengembangan: batas area, margin, dan kerangka tata letak rantai (juga `?garis=1` di alamat) |
 
 Animasi (kartu meluncur, bagi kartu, markah, cap bonus, konfeti) hanya CSS di `style.css`; `main.ts` mengirim `terbaru` dan `bagi` ke `htmlMeja` hanya pada gambar tepat setelah kejadian. Pengaturan gerak dikurangi pada sistem mematikan semuanya.
+
+Tambahan tahap animasi: pengaturan `animasi` (penuh, kurang, mati) dipasang sebagai `data-animasi` pada `<html>`. Zoom halus: `zoomHalus()` di `main.ts` membandingkan `data-skala` grup `.dunia` dengan gambar sebelumnya lalu menganimasikan transform. Pratinjau sisi: `src/tampilan/bayangan.ts` (`hitungBayangan`) menata rantai seandainya kartu dipasang di tiap ujung, lalu `svgRangkaian` menggambar `.bayangan` yang bisa diklik. Kartu sisa lawan terbuka lewat kelas `.lawan.terbuka` pada layar ringkasan.
+
+## CI dan rilis
+
+- `.github/workflows/ci.yml`: tiap push dan pull request menjalankan typecheck, aturan, format, tes, build, dan gerbang.
+- `.github/workflows/release.yml`: dipicu tag `v*`. Tag harus sama dengan `version` di `package.json`. Hasilnya rilis GitHub berisi `gaple-vX.Y.Z.zip` (isi `dist`).
+- Membuat rilis: naikkan versi, push, lalu `git tag vX.Y.Z` dan `git push origin vX.Y.Z`.
+- Build memakai `base: './'` sehingga bisa ditaruh di folder mana pun pada server statis.

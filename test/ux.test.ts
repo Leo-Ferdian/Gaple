@@ -4,7 +4,11 @@ import { buatAcak } from '../src/rng.ts';
 import { mulaiPartai, bagiKocokan } from '../src/partai.ts';
 import type { Partai, PartaiBerjalan, PartaiRingkasan } from '../src/partai.ts';
 import { langkahAcakPartai } from '../src/simulasi.ts';
-import { aplikasiBaru, mulaiPermainan, PENGATURAN_BAWAAN } from '../src/controller.ts';
+import { aplikasiBaru, mulaiPermainan, PENGATURAN_BAWAAN, rapikanPengaturan, TEMA_TERSEDIA } from '../src/controller.ts';
+import { AREA_LUAS, AREA_SEMPIT, tataRantai, indeksAnchor } from '../src/tampilan/tata-rantai.ts';
+import { pilihanKartu } from '../src/controller.ts';
+import { hitungBayangan } from '../src/tampilan/bayangan.ts';
+import { kartuLegal, letakkan } from '../src/meja.ts';
 import { htmlMeja, teksPengumuman, kursiPemain } from '../src/tampilan/meja-html.ts';
 import { htmlMenu, htmlAkhir, teksRingkasPilihan } from '../src/tampilan/layar-html.ts';
 import type { Pertandingan } from '../src/pertandingan.ts';
@@ -135,4 +139,78 @@ test('garis bantu pengembangan: batas area, margin, kerangka, dan sumbu hanya sa
   for (const kelas of ['gb-area', 'gb-margin', 'gb-kerangka']) assert.equal(hitung(html, new RegExp(`class="${kelas}"`, 'g')), 1, kelas);
   assert.equal(hitung(html, /class="gb-sumbu"/g), 2);
   assert.doesNotMatch(htmlMeja(partai), /garis-bantu|dengan-garis/);
+});
+
+test('tema: bawaan hijau, nilai asing diganti bawaan, menu menandai tema terpilih', () => {
+  assert.equal(PENGATURAN_BAWAAN.tema, 'hijau');
+  assert.equal(rapikanPengaturan({ tema: 'anggur' }).tema, 'anggur');
+  assert.equal(rapikanPengaturan({ tema: 'pink' }).tema, 'hijau');
+  assert.equal(rapikanPengaturan({ tema: 3 }).tema, 'hijau');
+  for (const tema of TEMA_TERSEDIA) {
+    const html = htmlMenu({ ...PENGATURAN_BAWAAN, tema });
+    assert.equal(hitung(html, /name="tema"/g), TEMA_TERSEDIA.length);
+    assert.match(html, new RegExp(`name="tema" value="${tema}" checked`));
+  }
+});
+
+test('area ponsel tegak (lebih tinggi daripada lebar) supaya kartu lebih besar di layar sempit', () => {
+  assert.ok(AREA_SEMPIT.tinggi > AREA_SEMPIT.lebar);
+  assert.ok(AREA_LUAS.lebar > AREA_LUAS.tinggi);
+});
+
+test('akhir kocokan: kartu sisa lawan terbuka dengan jumlah titiknya; saat berjalan tetap tertutup', () => {
+  const akhir = ringkasan(false);
+  const html = htmlMeja(akhir);
+  for (const pemain of [1, 2, 3] as const) {
+    const sisa = akhir.kocokan.tangan[pemain];
+    const titik = sisa.reduce((j, k) => j + k.a + k.b, 0);
+    const nama = ['Selatan', 'Barat', 'Utara', 'Timur'][pemain];
+    if (sisa.length === 0) assert.match(html, new RegExp(`${nama} · habis`));
+    else assert.match(html, new RegExp(`${nama} · ${sisa.length} kartu · ${titik} titik`));
+  }
+  assert.equal(hitung(html, /class="lawan \w+ terbuka"/g), 3);
+  assert.doesNotMatch(htmlMeja(partaiBerjalan(2, 4)), /terbuka/);
+});
+
+test('pratinjau sisi: bayangan jatuh tepat di tempat kartu itu akan berada, di kedua ujung', () => {
+  let diuji = 0;
+  let diMeja = 0;
+  for (let benih = 1; benih <= 40; benih++) {
+    for (const langkah of [6, 10, 14]) {
+      const partai = partaiBerjalan(benih, langkah);
+      const { kocokan } = partai;
+      if (kocokan.meja.rangkaian.length < 3) continue;
+      const sekarang = tataRantai(kocokan.meja.rangkaian, { area: AREA_LUAS, indeksAnchor: indeksAnchor(kocokan) });
+      for (const pilihan of kartuLegal(kocokan.tangan[kocokan.giliran], kocokan.meja)) {
+        if (pilihan.sisi.length < 2) continue;
+        const bayangan = hitungBayangan(kocokan, pilihan.kartu, pilihan.sisi, AREA_LUAS, sekarang);
+        assert.equal(bayangan.length, 2);
+        for (const b of bayangan) {
+          const baru = letakkan(kocokan.meja, pilihan.kartu, b.sisi);
+          const idAnchor = kocokan.meja.rangkaian[indeksAnchor(kocokan)]?.kartu.id;
+          const nyata = tataRantai(baru.rangkaian, {
+            area: AREA_LUAS,
+            indeksAnchor: baru.rangkaian.findIndex((l) => l.kartu.id === idAnchor),
+          });
+          const k = nyata.kartu.find((t) => t.id === pilihan.kartu.id);
+          assert.ok(k !== undefined);
+          const ke = (nilai: number, tengah: number, skala: number) => (nilai - tengah) / skala;
+          assert.ok(Math.abs(ke(k.x, 500, nyata.skala) - ke(b.x, 500, sekarang.skala)) < 1e-6, `benih ${benih}: x`);
+          assert.ok(Math.abs(ke(k.y, 250, nyata.skala) - ke(b.y, 250, sekarang.skala)) < 1e-6, `benih ${benih}: y`);
+          assert.equal(k.rotasi, b.rotasi);
+          diuji++;
+        }
+        // Di meja: dua bayangan hanya saat memang ada dua sisi.
+        const pm = pilihanKartu(partai, pilihan.kartu.id);
+        const html = htmlMeja(partai, { pilihan: pm });
+        if (pm !== null && pm.sisi.length > 1) {
+          assert.equal(hitung(html, /class="bayangan"/g), 2);
+          diMeja++;
+        }
+      }
+    }
+  }
+  assert.ok(diuji > 10, `hanya ${diuji} yang diuji`);
+  assert.ok(diMeja > 0, 'bayangan di meja tidak pernah teruji');
+  assert.doesNotMatch(htmlMeja(partaiBerjalan(3, 8)), /class="bayangan"/);
 });

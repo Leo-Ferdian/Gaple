@@ -3,6 +3,11 @@
    tampilan ponsel masih memakai aturan lama (lihat catatan pengembangan lanjutan di docs/DEVLOG.md). */
 :root {
   --latar: #17100b;
+  --alas-a: #1d130c;
+  --alas-b: #22170e;
+  --alas-c: #1a110a;
+  --meja-rgb: 17, 51, 42;
+  --tirai-rgb: 8, 20, 16;
   --kayu: #5a3820;
   --kayu-terang: #7d5230;
   --kayu-gelap: #2a190d;
@@ -25,6 +30,61 @@
   --tekstur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 
+/* ---- tema (pengaturan.tema -> data-tema pada <html>) ---- */
+:root[data-tema='biru'] {
+  --meja: #1f4468;
+  --meja-tua: #0e263d;
+  --papan: #1a2733;
+  --meja-rgb: 14, 38, 61;
+  --tirai-rgb: 5, 14, 24;
+}
+:root[data-tema='anggur'] {
+  --meja: #62253a;
+  --meja-tua: #35111e;
+  --papan: #2b1d21;
+  --punggung: #2c4a7a;
+  --punggung-hiasan: #aec4ec;
+  --meja-rgb: 53, 17, 30;
+  --tirai-rgb: 22, 6, 11;
+}
+:root[data-tema='kontras'] {
+  --latar: #000;
+  --alas-a: #000;
+  --alas-b: #000;
+  --alas-c: #000;
+  --kayu: #fff;
+  --kayu-terang: #fff;
+  --kayu-gelap: #000;
+  --meja: #0b0b0b;
+  --meja-tua: #000;
+  --papan: #000;
+  --teks: #fff;
+  --teks-redup: #e6e6e6;
+  --kapur: #fff;
+  --kartu: #fff;
+  --kartu-garis: #000;
+  --kartu-titik: #000;
+  --punggung: #0033a0;
+  --punggung-hiasan: #fff;
+  --aksen: #ffe34d;
+  --aksen-tua: #fff;
+  --garis: rgba(255, 255, 255, 0.75);
+  --meja-rgb: 0, 0, 0;
+  --tirai-rgb: 0, 0, 0;
+  --tekstur: none;
+}
+:root[data-tema='kontras'] body {
+  background: #000;
+}
+:root[data-tema='kontras'] .aksi button,
+:root[data-tema='kontras'] .dialog button:not(.utama),
+:root[data-tema='kontras'] .layar button:not(.utama),
+:root[data-tema='kontras'] .ubin .pilihan:not(:has(input:checked)) {
+  background: #000;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -35,7 +95,7 @@ body {
   color: var(--teks);
   background:
     radial-gradient(ellipse 70% 45% at 50% 0%, rgba(242, 184, 75, 0.2), transparent 70%),
-    repeating-linear-gradient(90deg, #1d130c 0 6px, #22170e 6px 13px, #1a110a 13px 17px), var(--latar);
+    repeating-linear-gradient(90deg, var(--alas-a) 0 6px, var(--alas-b) 6px 13px, var(--alas-c) 13px 17px), var(--latar);
   font:
     16px/1.45 system-ui,
     -apple-system,
@@ -400,7 +460,7 @@ button:focus-visible {
 .tangan {
   position: sticky;
   bottom: 0;
-  background: linear-gradient(rgba(17, 51, 42, 0), rgba(17, 51, 42, 0.94) 38%);
+  background: linear-gradient(rgba(var(--meja-rgb), 0), rgba(var(--meja-rgb), 0.94) 38%);
   z-index: 1;
   padding-bottom: 6px;
 }
@@ -1013,7 +1073,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 20, 16, 0.72);
+  background: rgba(var(--tirai-rgb), 0.72);
   backdrop-filter: blur(2px);
   animation: muncul 0.2s ease-out backwards;
 }
@@ -1242,4 +1302,283 @@ button:focus-visible {
 .gb-sumbu {
   stroke: rgba(255, 255, 255, 0.22);
   stroke-width: 1;
+}
+
+/* ======================================================================
+   Ponsel (lebar <= 640px): bingkai tipis, bar tiga baris, menu satu kolom,
+   rantai memakai area tegak, tangan tidak menempel
+   ====================================================================== */
+@media (max-width: 640px) {
+  :root {
+    --lebar-tangan: min(56px, calc((100vw - 64px) / 7));
+  }
+  #app {
+    padding: 6px;
+  }
+  .meja {
+    min-height: calc(100svh - 12px);
+    padding: 8px;
+    gap: 6px;
+    border-width: 8px;
+  }
+  .meja.layar {
+    padding: 18px 12px;
+  }
+
+  /* bar: papan skor, info, lalu tombol */
+  .bar {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .papan {
+    justify-content: space-between;
+    padding: 6px 14px 4px;
+    gap: 12px;
+  }
+  .markah {
+    min-width: 0;
+    flex: 1;
+  }
+  .markah .angka {
+    font-size: 1.5rem;
+  }
+  .info {
+    justify-self: stretch;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+  }
+  .aksi {
+    gap: 6px;
+  }
+  .aksi button {
+    flex: 1;
+    min-height: 44px;
+    padding: 0 8px;
+    font-size: 0.9rem;
+  }
+
+  /* meja */
+  .rangkaian-svg {
+    max-height: 48svh;
+    margin: 0 auto;
+  }
+  .meja.dengan-bantuan .rangkaian-svg {
+    max-height: 40svh;
+  }
+  .status {
+    font-size: 0.95rem;
+  }
+  .tangan,
+  .meja.dengan-bantuan .tangan {
+    position: relative;
+    background: none;
+    padding-top: 18px;
+    gap: 3px;
+  }
+  .ringkasan {
+    padding: 10px 14px 12px;
+    width: 100%;
+  }
+  .pilih-sisi button,
+  .ringkasan button,
+  .saran-baris button {
+    min-height: 48px;
+  }
+  .bantuan {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+
+  /* dialog */
+  .dialog {
+    min-width: 0;
+    width: calc(100% - 32px);
+    padding: 18px 16px 20px;
+  }
+  .dialog .tombol-baris button {
+    flex: 1;
+  }
+
+  /* menu */
+  .papan-nama {
+    padding: 22px 14px 16px;
+  }
+  .papan-nama h1 {
+    font-size: 2.4rem;
+  }
+  .hias span {
+    width: 54px;
+  }
+  .hias-kiri {
+    left: -14px;
+    top: -18px;
+  }
+  .hias-kanan {
+    right: -14px;
+    bottom: -18px;
+  }
+  .pengaturan {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .ubin .pilihan {
+    flex: 1 1 40%;
+    justify-content: center;
+  }
+  .ubin .pilihan small {
+    flex-basis: 100%;
+    text-align: center;
+  }
+  .mulai {
+    gap: 14px;
+  }
+  .mulai-aksi {
+    width: 100%;
+  }
+  .layar button.utama {
+    width: 100%;
+    max-width: 320px;
+  }
+  .saran-awal {
+    font-size: 0.9rem;
+  }
+  .aturan {
+    font-size: 0.9rem;
+  }
+}
+
+/* Tingkat animasi (pengaturan.animasi -> data-animasi pada <html>) */
+:root[data-animasi='mati'] *,
+:root[data-animasi='mati'] *::before,
+:root[data-animasi='mati'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-animasi='mati'] .konfeti {
+  display: none;
+}
+/* kurang: hanya gerak yang memberi tahu apa yang berubah; tanpa hiasan */
+:root[data-animasi='kurang'] .konfeti,
+:root[data-animasi='kurang'] .tangan.giliran::before,
+:root[data-animasi='kurang'] .bagi-baru .kartu-tangan,
+:root[data-animasi='kurang'] .bagi-baru .lipatan,
+:root[data-animasi='kurang'] .markah .angka,
+:root[data-animasi='kurang'] .cap-bonus,
+:root[data-animasi='kurang'] .berpikir::after {
+  animation: none;
+}
+:root[data-animasi='kurang'] .konfeti {
+  display: none;
+}
+:root[data-animasi='kurang'] .letak[data-baru] {
+  animation-duration: 0.2s;
+}
+
+/* akhir kocokan: kartu sisa lawan dibalik satu per satu */
+.lawan.terbuka .kipas {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.lawan.terbuka .lipatan {
+  width: 34px;
+  margin: 0;
+  animation: balik 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) backwards;
+  animation-delay: calc(var(--d, 0s) + var(--i, 0) * 0.08s);
+}
+.lawan.barat.terbuka {
+  --d: 0.15s;
+}
+.lawan.utara.terbuka {
+  --d: 0.75s;
+}
+.lawan.timur.terbuka {
+  --d: 1.35s;
+}
+.lawan.terbuka .lipatan:nth-child(1) {
+  --i: 0;
+}
+.lawan.terbuka .lipatan:nth-child(2) {
+  --i: 1;
+}
+.lawan.terbuka .lipatan:nth-child(3) {
+  --i: 2;
+}
+.lawan.terbuka .lipatan:nth-child(4) {
+  --i: 3;
+}
+.lawan.terbuka .lipatan:nth-child(5) {
+  --i: 4;
+}
+.lawan.terbuka .lipatan:nth-child(6) {
+  --i: 5;
+}
+.lawan.terbuka .lipatan:nth-child(7) {
+  --i: 6;
+}
+@keyframes balik {
+  from {
+    opacity: 0;
+    transform: perspective(300px) rotateY(95deg) scale(0.85);
+  }
+}
+.lawan.terbuka .nama-pemain {
+  color: var(--aksen);
+}
+@media (max-width: 640px) {
+  .lawan.terbuka .lipatan {
+    width: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lawan.terbuka .lipatan {
+    animation: none;
+  }
+}
+
+/* zoom halus: seluruh kartu rantai dalam satu grup yang diskalakan dari tengah area */
+.dunia {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+
+/* pratinjau sisi: bayangan kartu di ujung rantai yang boleh dipakai */
+.bayangan {
+  cursor: pointer;
+  opacity: 0.6;
+  animation: bayang 1.4s ease-in-out infinite;
+}
+.bayangan .badan {
+  fill: rgba(243, 233, 207, 0.35);
+  stroke: var(--aksen);
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+}
+.bayangan .titik {
+  opacity: 0.55;
+}
+@keyframes bayang {
+  50% {
+    opacity: 0.95;
+  }
+}
+.meja:has(button[data-sisi='kiri']:is(:hover, :focus-visible)) .bayangan[data-sisi='kiri'],
+.meja:has(button[data-sisi='kanan']:is(:hover, :focus-visible)) .bayangan[data-sisi='kanan'],
+.bayangan:hover {
+  opacity: 1;
+  animation: none;
+}
+.meja:has(button[data-sisi='kiri']:is(:hover, :focus-visible)) .bayangan[data-sisi='kiri'] .badan,
+.meja:has(button[data-sisi='kanan']:is(:hover, :focus-visible)) .bayangan[data-sisi='kanan'] .badan,
+.bayangan:hover .badan {
+  fill: rgba(243, 233, 207, 0.85);
+  stroke-dasharray: none;
+  stroke-width: 5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bayangan {
+    animation: none;
+  }
 }

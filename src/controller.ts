@@ -127,6 +127,14 @@ export const FORMAT_TERSEDIA = [FORMAT_BO3, FORMAT_BO5] as const;
 /** Tingkat AI yang tersedia. */
 export const AI_TERSEDIA = ['mudah', 'sedang', 'sulit'] as const;
 /** Mode: pertandingan biasa, atau latihan (pertandingan yang sama dengan Bantuan hitung dan tombol Saran). */
+/** Tema tampilan (warna meja dan bingkai); dipasang sebagai data-tema pada halaman. */
+export const TEMA_TERSEDIA = ['hijau', 'biru', 'anggur', 'kontras'] as const;
+export type Tema = (typeof TEMA_TERSEDIA)[number];
+
+/** Tingkat animasi: penuh, kurang (tanpa hiasan), atau mati. */
+export const ANIMASI_TERSEDIA = ['penuh', 'kurang', 'mati'] as const;
+export type TingkatAnimasi = (typeof ANIMASI_TERSEDIA)[number];
+
 export const MODE_TERSEDIA = ['pertandingan', 'latihan'] as const;
 export type ModeMain = (typeof MODE_TERSEDIA)[number];
 export type TingkatAi = (typeof AI_TERSEDIA)[number];
@@ -141,6 +149,8 @@ export interface Pengaturan {
   readonly suara: boolean;
   /** Sudah pernah menekan Main (menu pemain baru membuka Cara bermain). */
   readonly pernahMain: boolean;
+  readonly tema: Tema;
+  readonly animasi: TingkatAnimasi;
 }
 
 /** State seluruh aplikasi: pengaturan, dan pertandingan (null bila di menu). */
@@ -158,7 +168,19 @@ export const PENGATURAN_BAWAAN: Pengaturan = Object.freeze({
   mode: 'pertandingan',
   suara: true,
   pernahMain: false,
+  tema: 'hijau',
+  animasi: 'penuh',
 });
+
+/** Apakah nilai ini tingkat animasi yang tersedia? */
+export function adalahAnimasi(nilai: unknown): nilai is TingkatAnimasi {
+  return ANIMASI_TERSEDIA.some((a) => a === nilai);
+}
+
+/** Apakah nilai ini tema yang tersedia? */
+export function adalahTema(nilai: unknown): nilai is Tema {
+  return TEMA_TERSEDIA.some((t) => t === nilai);
+}
 
 /** Apakah nilai ini mode main yang tersedia? */
 export function adalahMode(nilai: unknown): nilai is ModeMain {
@@ -187,6 +209,8 @@ export function rapikanPengaturan(mentah: unknown): Pengaturan {
   const mode = 'mode' in sumber ? sumber.mode : undefined;
   const suara = 'suara' in sumber ? sumber.suara : undefined;
   const pernahMain = 'pernahMain' in sumber ? sumber.pernahMain : undefined;
+  const tema = 'tema' in sumber ? sumber.tema : undefined;
+  const animasi = 'animasi' in sumber ? sumber.animasi : undefined;
   return {
     format: adalahFormatTersimpan(format) ? format : PENGATURAN_BAWAAN.format,
     ai: adalahAi(ai) ? ai : PENGATURAN_BAWAAN.ai,
@@ -194,6 +218,8 @@ export function rapikanPengaturan(mentah: unknown): Pengaturan {
     mode: adalahMode(mode) ? mode : PENGATURAN_BAWAAN.mode,
     suara: typeof suara === 'boolean' ? suara : PENGATURAN_BAWAAN.suara,
     pernahMain: typeof pernahMain === 'boolean' ? pernahMain : PENGATURAN_BAWAAN.pernahMain,
+    tema: adalahTema(tema) ? tema : PENGATURAN_BAWAAN.tema,
+    animasi: adalahAnimasi(animasi) ? animasi : PENGATURAN_BAWAAN.animasi,
   };
 }
 

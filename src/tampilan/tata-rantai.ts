@@ -126,7 +126,7 @@ interface PosisiKartu {
 export const UKURAN_KARTU: UkuranKartu = Object.freeze({ panjang: PANJANG_KARTU, lebar: LEBAR_KARTU });
 /** Area untuk layar lebar dan layar sempit (HP). Aspeknya mengikuti ruang yang tersedia. */
 export const AREA_LUAS: Area = Object.freeze({ lebar: 1000, tinggi: 500 });
-export const AREA_SEMPIT: Area = Object.freeze({ lebar: 600, tinggi: 440 });
+export const AREA_SEMPIT: Area = Object.freeze({ lebar: 400, tinggi: 560 });
 
 export const MARGIN = 8; // jarak minimal kartu dari tepi area
 /** Skala awal kartu. Disisakan ruang (kartu tidak dimulai pada ukuran penuh) supaya rantai jarang perlu mengecil. */

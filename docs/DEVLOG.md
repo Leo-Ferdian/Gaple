@@ -11,6 +11,38 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-01 | CI dan rilis GitHub
+
+- **Tujuan:** pemeriksaan otomatis dan rilis yang dibuat dengan satu tag.
+- **Dikerjakan:** (1) `ci.yml` sudah ada (typecheck, aturan, format, tes, build, gerbang); ditambah `concurrency` agar proses lama dibatalkan saat ada push baru. (2) `release.yml` baru: dipicu tag `v*`, memastikan tag sama dengan versi `package.json`, menjalankan `npm run cek` dan gerbang, mengemas `dist` menjadi `gaple-vX.Y.Z.zip`, lalu membuat rilis lewat `gh release create` dengan catatan otomatis (tanpa aksi pihak ketiga). (3) `vite.config.ts`: `base: './'` supaya hasil build bisa ditaruh di folder atau alamat mana pun.
+- **Keputusan:** tidak ada penerbitan ke GitHub Pages; bisa ditambah bila Anda mau. Zip rilis perlu disajikan lewat server statis (modul JS tidak jalan bila dibuka langsung dari berkas).
+- **Cara rilis:** naikkan versi di `package.json`, commit dan push, lalu `git tag v0.29.0` dan `git push origin v0.29.0`. Rilis muncul di tab Releases setelah workflow selesai.
+- **Tes:** tidak ada perubahan; 276 tes lolos.
+- **Berikutnya:** uji di ponsel nyata, atau sisa ide animasi.
+
+---
+
+## 2026-11-01 | Animasi: kartu sisa terbuka, zoom halus, pratinjau sisi, pengaturan animasi
+
+- **Tujuan:** tahap animasi tingkat "Kaya" yang tidak mengubah desain meja dan kartu.
+- **Dikerjakan:** (1) Di akhir kocokan, kartu sisa lawan dibalik terbuka dengan nama, jumlah kartu, dan total titik. (2) Saat skala rantai berubah, gambar di-zoom halus (WAAPI pada grup `.dunia`), bukan melompat. (3) Pratinjau sisi: kartu yang bisa dipasang di dua ujung menampilkan bayangan putus-putus di kedua ujung; bayangan bisa diklik untuk memilih sisi (`src/tampilan/bayangan.ts`, posisi dihitung dari tata letak terkunci sehingga sama persis dengan hasil nyata). (4) Pengaturan animasi Penuh, Kurang, Mati (`data-animasi` pada halaman); `prefers-reduced-motion` tetap dihormati.
+- **Keputusan:** papan skor berhitung, ketukan pendaratan, jeda berpikir bervariasi, dan transisi layar tidak dikerjakan.
+- **Tes:** 2 tes baru (bayangan sama dengan penempatan nyata di dua ujung, tampil di meja hanya saat ada dua sisi); 276 tes lolos.
+- **Berikutnya:** uji di ponsel nyata, CI dan rilis GitHub.
+
+---
+
+## 2026-11-01 | Tahap ponsel dan pengaturan tema
+
+- **Tujuan:** menggarap bagian mobile yang ditunda dan menambah pengaturan tema (dicatat untuk rilis bersama).
+- **Dikerjakan:** (1) Tema: pengaturan `tema` (Hijau bawaan, Biru, Anggur, Kontras tinggi) di menu; dipasang sebagai `data-tema` pada halaman dan hanya mengubah variabel warna (kontras tinggi: hitam, putih, kuning, tanpa tekstur, bingkai putih). (2) Ponsel: area rantai kini tegak (400x560, dulu 600x440 mendatar) sehingga kartu sekitar sepertiga lebih besar di layar 360 px (kira-kira 64 px, dulu 47 px). Bingkai kayu tipis, bar tiga baris (papan skor, info, tombol berukuran ketuk), menu satu kolom dengan ubin penuh, dialog selebar layar, tangan tidak lagi menempel (tidak menutup status dan panel), tombol minimal 44-48 px.
+- **Keputusan:** kerangka minimal lebar tetap 3 panjang kartu; menurunkannya ke 2 saya ukur dan hasilnya kartu justru lebih kecil. Kartu tetap mengecil pada rantai panjang di ponsel (skala rata-rata sekitar 0,6); itu kompromi yang sama dengan PC.
+- **Belum dikerjakan:** pengujian di perangkat nyata dan gestur (geser, tahan lama); kartu ponsel dengan Bantuan hitung masih kecil (rantai dibatasi 40% tinggi layar).
+- **Tes:** 2 tes baru; 274 tes lolos.
+- **Berikutnya:** menunggu perintah Anda (mis. uji di ponsel nyata, CI dan rilis GitHub).
+
+---
+
 ## 2026-11-01 | Segmen tengah lebih pendek dan garis bantu batas meja
 
 - **Tujuan:** kolom tengah (antara dua belokan) tidak perlu 3 kartu; belokan boleh lebih awal supaya ruang meja terpakai optimal. Plus garis sementara untuk melihat batas meja saat pengembangan.

@@ -21,6 +21,7 @@ import { buatPelacak, pandangan } from '../pelacak.ts';
 import { tataRantai, indeksAnchor, AREA_LUAS } from './tata-rantai.ts';
 import type { Area } from './tata-rantai.ts';
 import { svgRangkaian } from './rangkaian-svg.ts';
+import { hitungBayangan } from './bayangan.ts';
 import type { KartuBaru } from './rangkaian-svg.ts';
 
 export type { KartuBaru };
@@ -64,9 +65,23 @@ function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, lat
   );
 }
 
-function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, berjalan: boolean): string {
+function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, berjalan: boolean, buka: boolean): string {
   const giliran = berjalan && kocokan.giliran === pemain ? ' giliran' : '';
-  const jumlah = kocokan.tangan[pemain].length;
+  const tangan = kocokan.tangan[pemain];
+  const jumlah = tangan.length;
+  if (buka) {
+    // Kocokan berakhir: kartu sisa dibuka supaya jelas dari mana markah berasal.
+    const titik = tangan.reduce((jml, k) => jml + k.a + k.b, 0);
+    const kartu = urutkanTangan(tangan)
+      .map((k) => `<span class="lipatan">${svgKartu(k.a, k.b, ARAH_TEGAK)}</span>`)
+      .join('');
+    const ringkas = jumlah === 0 ? 'habis' : `${jumlah} kartu · ${titik} titik`;
+    return (
+      `<section class="lawan ${kelas} terbuka" aria-label="${NAMA_PEMAIN[pemain]}, ${jumlah === 0 ? 'kartu habis' : `sisa ${jumlah} kartu, ${titik} titik`}">` +
+      `<div class="nama-pemain">${NAMA_PEMAIN[pemain]} · ${ringkas}</div>` +
+      `<div class="kipas">${kartu}</div></section>`
+    );
+  }
   const punggung = Array.from({ length: jumlah }, () => `<span class="lipatan">${svgPunggung(ARAH_TEGAK)}</span>`).join('');
   return (
     `<section class="lawan ${kelas}${giliran}" aria-label="${NAMA_PEMAIN[pemain]}, ${jumlah} kartu">` +
@@ -75,13 +90,21 @@ function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, be
   );
 }
 
-function htmlRangkaian(kocokan: StateKocokan, area: Area, terbaru: KartuBaru | null, garis: boolean): string {
+function htmlRangkaian(
+  kocokan: StateKocokan,
+  area: Area,
+  terbaru: KartuBaru | null,
+  garis: boolean,
+  pilihan: PilihanManusia | null,
+): string {
   const { meja } = kocokan;
   if (meja.rangkaian.length === 0) {
     return `<div class="rangkaian kosong">Meja masih kosong</div>`;
   }
   const tata = tataRantai(meja.rangkaian, { area, indeksAnchor: indeksAnchor(kocokan) });
-  return `<div class="rangkaian">${svgRangkaian(tata, meja, terbaru, garis)}</div>`;
+  // Pilihan kartu yang bisa dipasang di dua ujung: tampilkan bayangan di masing-masing ujung.
+  const bayangan = pilihan !== null && pilihan.sisi.length > 1 ? hitungBayangan(kocokan, pilihan.kartu, pilihan.sisi, area, tata) : [];
+  return `<div class="rangkaian">${svgRangkaian(tata, meja, terbaru, garis, bayangan)}</div>`;
 }
 
 function teksLangkahTerakhir(kocokan: StateKocokan): string {
@@ -263,16 +286,16 @@ export function htmlMeja(
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}${bagi ? ' bagi-baru' : ''}">` +
     htmlBar(partai, nomorPartai, dijeda, latihan, suara) +
-    htmlLawan(kocokan, UTARA, 'utara', berjalan) +
-    htmlLawan(kocokan, BARAT, 'barat', berjalan) +
-    `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian, terbaru, garis)}` +
+    htmlLawan(kocokan, UTARA, 'utara', berjalan, partai.status === 'ringkasan') +
+    htmlLawan(kocokan, BARAT, 'barat', berjalan, partai.status === 'ringkasan') +
+    `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian, terbaru, garis, pilihan)}` +
     `<p class="status" role="status">${teksStatus(partai)}<span class="terakhir">${teksLangkahTerakhir(kocokan)}</span></p>` +
     (pilihan ? htmlPilihSisi(kocokan, pilihan) : '') +
     (latihan && partai.status === 'berjalan' ? htmlSaran(partai, saran, pilihan !== null) : '') +
     (partai.status === 'ringkasan' ? htmlRingkasan(partai) : '') +
     `</section>` +
     (tampilBantuan ? htmlBantuan(kocokan) : '') +
-    htmlLawan(kocokan, TIMUR, 'timur', berjalan) +
+    htmlLawan(kocokan, TIMUR, 'timur', berjalan, partai.status === 'ringkasan') +
     htmlTangan(partai, pilihan?.kartu.id ?? null, saran?.kartu.id ?? null) +
     htmlTirai(konfirmasi, dijeda) +
     `</div>`

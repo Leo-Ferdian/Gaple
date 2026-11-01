@@ -26,6 +26,19 @@ const PILIHAN_MODE: readonly Pilihan[] = [
   { nilai: 'latihan', nama: 'Latihan', ket: 'dengan tombol Saran dan Bantuan hitung' },
 ];
 
+const PILIHAN_TEMA: readonly Pilihan[] = [
+  { nilai: 'hijau', nama: 'Hijau' },
+  { nilai: 'biru', nama: 'Biru' },
+  { nilai: 'anggur', nama: 'Anggur' },
+  { nilai: 'kontras', nama: 'Kontras tinggi' },
+];
+
+const PILIHAN_ANIMASI: readonly Pilihan[] = [
+  { nilai: 'penuh', nama: 'Penuh' },
+  { nilai: 'kurang', nama: 'Kurang', ket: 'tanpa hiasan' },
+  { nilai: 'mati', nama: 'Mati' },
+];
+
 const PILIHAN_AI: readonly Pilihan[] = [
   { nilai: 'mudah', nama: 'Mudah' },
   { nilai: 'sedang', nama: 'Sedang' },
@@ -89,6 +102,8 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<fieldset><legend>Mode</legend><div class="ubin">${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</div></fieldset>` +
     `<fieldset><legend>Format pertandingan</legend><div class="ubin">${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</div></fieldset>` +
     `<fieldset><legend>Lawan</legend><div class="ubin">${radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n))}</div></fieldset>` +
+    `<fieldset class="tema"><legend>Tema</legend><div class="ubin">${radio('tema', PILIHAN_TEMA, pengaturan.tema, () => true)}</div></fieldset>` +
+    `<fieldset><legend>Animasi</legend><div class="ubin">${radio('animasi', PILIHAN_ANIMASI, pengaturan.animasi, () => true)}</div></fieldset>` +
     `<fieldset><legend>Bantuan dan suara</legend>` +
     `<label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label>` +
     `<label class="pilihan"><input type="checkbox" name="suara"${pengaturan.suara ? ' checked' : ''}> Efek suara</label></fieldset>` +

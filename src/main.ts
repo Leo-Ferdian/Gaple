@@ -26,6 +26,8 @@ import {
   mainkanManusia,
   adalahAi,
   adalahMode,
+  adalahTema,
+  adalahAnimasi,
   saranManusia,
   menungguManusia,
   PEMAIN_MANUSIA,
@@ -73,6 +75,7 @@ let layarSebelumnya = '';
 let statusSebelumnya = '';
 // Garis bantu pengembangan (batas meja): ?garis=1 di alamat, atau tombol G.
 let garisBantu = parameter.get('garis') === '1';
+let skalaSebelumnya: { readonly kunci: string; readonly skala: number } | null = null; // untuk zoom halus rantai
 let konfirmasiKeluar = false; // dialog "Keluar ke menu?" sedang tampil
 let papanKetik = false; // masukan terakhir dari papan ketik (fokus perlu dijaga saat gambar ulang)
 
@@ -156,8 +159,33 @@ function pulihkanFokus(pemilih: string | null): void {
   if (kandidat instanceof HTMLElement) kandidat.focus({ preventScroll: true });
 }
 
+const gerakDikurangi = window.matchMedia('(prefers-reduced-motion: reduce)');
+const animasiAktif = (): boolean => aplikasi.pengaturan.animasi !== 'mati' && !gerakDikurangi.matches;
+
+/**
+ * Posisi kartu terkunci; bila rantai bertambah panjang, yang berubah hanya skala seragam. Karena itu
+ * gambar baru bisa dibuat tampak seperti yang lama dengan skala selisihnya, lalu dianimasikan ke 1.
+ */
+function zoomHalus(kunci: string): void {
+  const dunia = app.querySelector('.dunia');
+  const skala = dunia instanceof SVGElement ? Number(dunia.dataset.skala) : NaN;
+  if (!(dunia instanceof SVGElement) || !Number.isFinite(skala)) {
+    skalaSebelumnya = null;
+    return;
+  }
+  const lama = skalaSebelumnya;
+  skalaSebelumnya = { kunci, skala };
+  if (lama === null || lama.kunci !== kunci || Math.abs(lama.skala - skala) < 0.001 || !animasiAktif()) return;
+  dunia.animate([{ transform: `scale(${lama.skala / skala})` }, { transform: 'scale(1)' }], {
+    duration: 420,
+    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  });
+}
+
 function gambar(): void {
   clearTimeout(pewaktu);
+  document.documentElement.dataset.tema = aplikasi.pengaturan.tema;
+  document.documentElement.dataset.animasi = aplikasi.pengaturan.animasi;
   const layar = layarAktif(aplikasi);
   const { pertandingan } = aplikasi;
   const kejadian = bunyikan(layar);
@@ -194,6 +222,7 @@ function gambar(): void {
       garis: garisBantu,
     });
     umumkan(teksPengumuman(partai));
+    zoomHalus(`${nomorPartai(aplikasi)}-${partai.nomorKocokan}`);
     // Dialog terbuka: isi meja tidak bisa dijangkau papan ketik maupun pembaca layar.
     if (konfirmasiKeluar || dijeda) {
       for (const anak of Array.from(app.querySelectorAll('.meja > :not(.tirai)'))) anak.setAttribute('inert', '');
@@ -240,8 +269,10 @@ function keluarKeMenu(): void {
 }
 
 app.addEventListener('click', (e) => {
-  const tombol = e.target instanceof Element ? e.target.closest('button') : null;
-  if (!tombol || tombol.disabled) return;
+  // Tombol, atau bayangan kartu di rantai (mengetuknya sama dengan memilih sisi itu).
+  const tombol = e.target instanceof Element ? e.target.closest('button, .bayangan') : null;
+  if (!(tombol instanceof HTMLElement || tombol instanceof SVGElement)) return;
+  if (tombol instanceof HTMLButtonElement && tombol.disabled) return;
   const { kartu, sisi, aksi } = tombol.dataset;
 
   if (kartu) {
@@ -327,6 +358,8 @@ app.addEventListener('change', (e) => {
   const { name, value } = e.target;
   if (name === 'format' && adalahFormat(value)) aplikasi = ubahPengaturan(aplikasi, { format: value });
   else if (name === 'mode' && adalahMode(value)) aplikasi = ubahPengaturan(aplikasi, { mode: value });
+  else if (name === 'animasi' && adalahAnimasi(value)) aplikasi = ubahPengaturan(aplikasi, { animasi: value });
+  else if (name === 'tema' && adalahTema(value)) aplikasi = ubahPengaturan(aplikasi, { tema: value });
   else if (name === 'ai' && adalahAi(value)) aplikasi = ubahPengaturan(aplikasi, { ai: value });
   else if (name === 'bantuan') aplikasi = ubahPengaturan(aplikasi, { bantuan: e.target.checked });
   else if (name === 'suara') {

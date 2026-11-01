@@ -71,7 +71,10 @@ test('ubahPengaturan merapikan nilai dan tidak mengubah state lama', () => {
   assert.equal(ubahPengaturan(a, { ai: 'sulit' }).pengaturan.ai, 'sulit');
   // @ts-expect-error sengaja salah: mode tidak dikenal
   assert.equal(ubahPengaturan(a, { mode: 'turnamen' }).pengaturan.mode, 'pertandingan');
-  assert.equal(ubahPengaturan(a, { mode: 'latihan', suara: true, pernahMain: false }).pengaturan.mode, 'latihan');
+  assert.equal(
+    ubahPengaturan(a, { mode: 'latihan', suara: true, pernahMain: false, tema: 'hijau', animasi: 'penuh' }).pengaturan.mode,
+    'latihan',
+  );
   assert.equal(ubahPengaturan(a, { ai: 'sedang' }).pengaturan.ai, 'sedang');
   assert.equal(ubahPengaturan(a, { bantuan: true }).pengaturan.bantuan, true);
 });
@@ -146,7 +149,16 @@ test('nomor partai naik tiap partai selesai dan poin dibawa ke partai berikutnya
 // ---------------------------------------------------------------------------
 
 test('menu: format dan lawan terpilih sesuai pengaturan, tingkat yang belum ada dinonaktifkan', () => {
-  const html = htmlMenu({ format: 'bo5', ai: 'mudah', bantuan: false, mode: 'pertandingan', suara: true, pernahMain: false });
+  const html = htmlMenu({
+    format: 'bo5',
+    ai: 'mudah',
+    bantuan: false,
+    mode: 'pertandingan',
+    suara: true,
+    pernahMain: false,
+    tema: 'hijau',
+    animasi: 'penuh',
+  });
   assert.match(html, /name="format" value="bo5" checked/);
   assert.doesNotMatch(html, /name="format" value="bo3" checked/);
   assert.match(html, /name="ai" value="mudah" checked/);
@@ -154,7 +166,16 @@ test('menu: format dan lawan terpilih sesuai pengaturan, tingkat yang belum ada 
   assert.match(html, /name="ai" value="sulit"(?! disabled)/);
   assert.match(html, /name="mode" value="pertandingan" checked/);
   assert.match(
-    htmlMenu({ format: 'bo3', ai: 'mudah', bantuan: false, mode: 'latihan', suara: true, pernahMain: false }),
+    htmlMenu({
+      format: 'bo3',
+      ai: 'mudah',
+      bantuan: false,
+      mode: 'latihan',
+      suara: true,
+      pernahMain: false,
+      tema: 'hijau',
+      animasi: 'penuh',
+    }),
     /name="mode" value="latihan" checked/,
   );
   assert.match(html, /data-aksi="main"/);

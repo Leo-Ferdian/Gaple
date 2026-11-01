@@ -1,0 +1,39 @@
+# Rilis otomatis: dorong tag `vX.Y.Z` (harus sama dengan versi di package.json),
+# lalu GitHub membuat rilis berisi gaple-vX.Y.Z.zip (hasil build, siap diunggah ke hosting statis).
+name: Rilis
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  rilis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tag harus sama dengan versi package.json
+        run: |
+          versi="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$versi" ]; then
+            echo "Tag $GITHUB_REF_NAME tidak sama dengan versi paket $versi"
+            exit 1
+          fi
+      - run: npm run cek
+      - run: npm run gerbang
+      - name: Kemas hasil build
+        run: |
+          cd dist
+          zip -r "../gaple-$GITHUB_REF_NAME.zip" .
+      - name: Buat rilis
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "gaple-$GITHUB_REF_NAME.zip" --title "Gaple $GITHUB_REF_NAME" --generate-notes

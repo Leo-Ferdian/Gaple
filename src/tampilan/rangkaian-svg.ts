@@ -8,6 +8,7 @@ import { isiKartu, ARAH_DATAR, PANJANG_KARTU, LEBAR_KARTU } from './kartu-svg.ts
 import type { Meja } from '../meja.ts';
 import { kerangkaUntuk, MARGIN } from './tata-rantai.ts';
 import type { HasilTata } from './tata-rantai.ts';
+import type { Bayangan } from './bayangan.ts';
 
 /** `meja` dipakai untuk label aksesibilitas (angka ujung kiri dan kanan). */
 export interface KartuBaru {
@@ -22,6 +23,7 @@ export function svgRangkaian(
   meja: Pick<Meja, 'ujungKiri' | 'ujungKanan'>,
   terbaru: KartuBaru | null = null,
   garis = false,
+  bayangan: readonly Bayangan[] = [],
 ): string {
   const { area, skala, kartu } = tata;
   const grup = kartu
@@ -30,6 +32,12 @@ export function svgRangkaian(
       const transform = `translate(${k.x.toFixed(2)} ${k.y.toFixed(2)}) rotate(${k.rotasi}) scale(${skala.toFixed(4)}) translate(${-PANJANG_KARTU / 2} ${-LEBAR_KARTU / 2})`;
       const baru = terbaru !== null && terbaru.id === k.id ? ` data-baru="1" data-dari="${terbaru.dari}"` : '';
       return `<g class="${kelas}"${baru}><g class="kartu" transform="${transform}">${isiKartu(k.awal, k.akhir, ARAH_DATAR)}</g></g>`;
+    })
+    .join('');
+  const pratinjau = bayangan
+    .map((b) => {
+      const transform = `translate(${b.x.toFixed(2)} ${b.y.toFixed(2)}) rotate(${b.rotasi}) scale(${skala.toFixed(4)}) translate(${-PANJANG_KARTU / 2} ${-LEBAR_KARTU / 2})`;
+      return `<g class="bayangan" data-sisi="${b.sisi}"><g class="kartu" transform="${transform}">${isiKartu(b.awal, b.akhir, ARAH_DATAR)}</g></g>`;
     })
     .join('');
   // Garis bantu pengembangan: batas area (merah), tepi dengan margin (kuning putus-putus),
@@ -50,6 +58,6 @@ export function svgRangkaian(
   }
   return (
     `<svg class="rangkaian-svg${garis ? ' dengan-garis' : ''}" viewBox="0 0 ${area.lebar} ${area.tinggi}" role="img" ` +
-    `aria-label="Rangkaian di meja, ujung kiri ${meja.ujungKiri}, ujung kanan ${meja.ujungKanan}">${bantu}${grup}</svg>`
+    `aria-label="Rangkaian di meja, ujung kiri ${meja.ujungKiri}, ujung kanan ${meja.ujungKanan}">${bantu}<g class="dunia" data-skala="${skala.toFixed(5)}">${grup}${pratinjau}</g></svg>`
   );
 }
