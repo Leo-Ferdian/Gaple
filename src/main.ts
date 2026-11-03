@@ -31,7 +31,9 @@ import {
   saranManusia,
   menungguManusia,
   PEMAIN_MANUSIA,
+  jedaBerpikir,
 } from './controller.ts';
+import type { NomorPemain } from './engine.ts';
 import type { PilihanManusia, Saran } from './controller.ts';
 import { adalahFormat } from './pertandingan.ts';
 import { muatPengaturan, simpanPengaturan } from './penyimpanan.ts';
@@ -75,6 +77,7 @@ let layarSebelumnya = '';
 let statusSebelumnya = '';
 // Garis bantu pengembangan (batas meja): ?garis=1 di alamat, atau tombol G.
 let garisBantu = parameter.get('garis') === '1';
+let markahTampil: { readonly kunci: number; readonly nilai: readonly [number, number] } | null = null; // untuk papan skor berhitung
 let skalaSebelumnya: { readonly kunci: string; readonly skala: number } | null = null; // untuk zoom halus rantai
 let konfirmasiKeluar = false; // dialog "Keluar ke menu?" sedang tampil
 let papanKetik = false; // masukan terakhir dari papan ketik (fokus perlu dijaga saat gambar ulang)
@@ -83,12 +86,13 @@ let papanKetik = false; // masukan terakhir dari papan ketik (fokus perlu dijaga
 interface Kejadian {
   readonly terbaru: KartuBaru | null;
   readonly bagi: boolean;
+  readonly lewat: NomorPemain | null;
 }
 
 /** Memutar efek untuk yang baru terjadi sejak gambar terakhir, dan mengembalikan penanda animasinya. */
 function bunyikan(layar: string): Kejadian {
   const partai = partaiAktif(aplikasi);
-  let kejadian: Kejadian = { terbaru: null, bagi: false };
+  let kejadian: Kejadian = { terbaru: null, bagi: false, lewat: null };
   if (layar === 'akhir' && layarSebelumnya !== 'akhir') {
     suara.putar(aplikasi.pertandingan?.juara === 0 ? 'menang' : 'kalah');
   }
@@ -98,16 +102,17 @@ function bunyikan(layar: string): Kejadian {
   const kunci = `${nomorPartaiSaatIni()}-${partai.nomorKocokan}`;
   const { riwayat } = partai.kocokan;
   if (kunci !== kunciKocokan) {
-    kejadian = { terbaru: null, bagi: riwayat.length === 0 };
+    kejadian = { terbaru: null, bagi: riwayat.length === 0, lewat: null };
     if (kejadian.bagi) suara.putar('bagi');
   } else if (riwayat.length > riwayatTerdengar) {
     const terakhir = riwayat.at(-1);
     if (terakhir !== undefined) {
       if (terakhir.aksi === 'lewat') {
         suara.putar('lewat');
+        kejadian = { terbaru: null, bagi: false, lewat: terakhir.pemain };
       } else {
         suara.putar(terakhir.kartu.a === terakhir.kartu.b ? 'balak' : 'letak');
-        kejadian = { terbaru: { id: terakhir.kartu.id, dari: kursiPemain(terakhir.pemain) }, bagi: false };
+        kejadian = { terbaru: { id: terakhir.kartu.id, dari: kursiPemain(terakhir.pemain) }, bagi: false, lewat: null };
       }
       // Giliran Anda tiba (setelah langkah komputer): bunyi lembut sesudah klak kartu.
       if (partai.status === 'berjalan' && terakhir.pemain !== PEMAIN_MANUSIA && menungguManusia(partai)) suara.putar('giliran', 0.18);
@@ -182,6 +187,28 @@ function zoomHalus(kunci: string): void {
   });
 }
 
+/** Papan skor berhitung: angka markah naik pelan dari nilai lama ke nilai baru. */
+function hitungMarkah(kunci: number, markah: readonly [number, number]): void {
+  const lama = markahTampil;
+  markahTampil = { kunci, nilai: markah };
+  if (lama === null || lama.kunci !== kunci || !animasiAktif()) return;
+  for (const tim of [0, 1]) {
+    const dari = lama.nilai[tim];
+    const ke = markah[tim];
+    const el = app.querySelector(`.markah-${tim} .angka`);
+    if (dari === undefined || ke === undefined || ke <= dari || !(el instanceof HTMLElement)) continue;
+    const mulaiMs = performance.now();
+    const langkah = (sekarang: number): void => {
+      const t = Math.min(1, (sekarang - mulaiMs) / 700);
+      el.textContent = String(Math.round(dari + (ke - dari) * (1 - (1 - t) ** 3)));
+      if (t < 1 && el.isConnected) requestAnimationFrame(langkah);
+      else el.textContent = String(ke);
+    };
+    el.textContent = String(dari);
+    requestAnimationFrame(langkah);
+  }
+}
+
 function gambar(): void {
   clearTimeout(pewaktu);
   document.documentElement.dataset.tema = aplikasi.pengaturan.tema;
@@ -218,20 +245,24 @@ function gambar(): void {
       suara: aplikasi.pengaturan.suara,
       terbaru: kejadian.terbaru,
       bagi: kejadian.bagi,
+      lewat: kejadian.lewat,
       konfirmasi: konfirmasiKeluar,
       garis: garisBantu,
     });
     umumkan(teksPengumuman(partai));
     zoomHalus(`${nomorPartai(aplikasi)}-${partai.nomorKocokan}`);
+    hitungMarkah(nomorPartai(aplikasi), partai.markah);
     // Dialog terbuka: isi meja tidak bisa dijangkau papan ketik maupun pembaca layar.
     if (konfirmasiKeluar || dijeda) {
       for (const anak of Array.from(app.querySelectorAll('.meja > :not(.tirai)'))) anak.setAttribute('inert', '');
     }
     if (!dijeda && !konfirmasiKeluar && adaLangkahOtomatis(partai)) {
+      // Tingkat animasi Penuh: jeda berpikir menyesuaikan jumlah pilihan komputer; selain itu tetap.
+      const tunggu = aplikasi.pengaturan.animasi === 'penuh' && !gerakDikurangi.matches ? jedaBerpikir(partai, jeda) : jeda;
       pewaktu = setTimeout(() => {
         aplikasi = ubahPartaiAktif(aplikasi, (p) => langkahOtomatis(p, acak, aplikasi.pengaturan.ai));
         gambar();
-      }, jeda);
+      }, tunggu);
     }
   }
   pulihkanFokus(fokus);

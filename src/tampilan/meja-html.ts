@@ -65,7 +65,9 @@ function htmlBar(partai: PartaiTampil, nomorPartai: number, dijeda: boolean, lat
   );
 }
 
-function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, berjalan: boolean, buka: boolean): string {
+const capLewat = `<span class="lewat-cap" aria-hidden="true">Lewat</span>`;
+
+function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, berjalan: boolean, buka: boolean, lewat: boolean): string {
   const giliran = berjalan && kocokan.giliran === pemain ? ' giliran' : '';
   const tangan = kocokan.tangan[pemain];
   const jumlah = tangan.length;
@@ -84,9 +86,9 @@ function htmlLawan(kocokan: StateKocokan, pemain: NomorPemain, kelas: string, be
   }
   const punggung = Array.from({ length: jumlah }, () => `<span class="lipatan">${svgPunggung(ARAH_TEGAK)}</span>`).join('');
   return (
-    `<section class="lawan ${kelas}${giliran}" aria-label="${NAMA_PEMAIN[pemain]}, ${jumlah} kartu">` +
+    `<section class="lawan ${kelas}${giliran}${lewat ? ' lewat-baru' : ''}" aria-label="${NAMA_PEMAIN[pemain]}, ${jumlah} kartu">` +
     `<div class="nama-pemain">${NAMA_PEMAIN[pemain]} · ${jumlah}</div>` +
-    `<div class="kipas">${punggung}</div></section>`
+    `<div class="kipas">${punggung}</div>${lewat ? capLewat : ''}</section>`
   );
 }
 
@@ -204,7 +206,7 @@ function htmlRingkasan(partai: PartaiRingkasan): string {
   );
 }
 
-function htmlTangan(partai: PartaiTampil, terpilih: string | null, saranId: string | null): string {
+function htmlTangan(partai: PartaiTampil, terpilih: string | null, saranId: string | null, lewat: boolean): string {
   const { kocokan } = partai;
   const giliranAnda = partai.status === 'berjalan' && kocokan.giliran === PEMAIN_MANUSIA;
   const legal = new Set(kartuLegalPemain(kocokan, PEMAIN_MANUSIA).map((p) => p.kartu.id));
@@ -215,7 +217,7 @@ function htmlTangan(partai: PartaiTampil, terpilih: string | null, saranId: stri
       return `<button type="button" class="${kelas}" data-kartu="${kartu.id}"${aktif ? '' : ' disabled'}>${svgKartu(kartu.a, kartu.b, ARAH_TEGAK)}</button>`;
     })
     .join('');
-  return `<section class="tangan${giliranAnda ? ' giliran' : ''}" aria-label="Tangan Anda, ${kocokan.tangan[PEMAIN_MANUSIA].length} kartu">${tombol}</section>`;
+  return `<section class="tangan${giliranAnda ? ' giliran' : ''}${lewat ? ' lewat-baru' : ''}" aria-label="Tangan Anda, ${kocokan.tangan[PEMAIN_MANUSIA].length} kartu">${tombol}${lewat ? capLewat : ''}</section>`;
 }
 
 function htmlTirai(konfirmasi: boolean, dijeda: boolean): string {
@@ -253,6 +255,8 @@ export interface OpsiMeja {
   readonly suara?: boolean;
   /** Kartu yang baru dimainkan (animasi meluncur). */
   readonly terbaru?: KartuBaru | null;
+  /** Pemain yang baru saja lewat (balon "Lewat"). */
+  readonly lewat?: NomorPemain | null;
   /** Kocokan baru saja dibagi (animasi membagi kartu). */
   readonly bagi?: boolean;
   /** Tampilkan dialog konfirmasi keluar ke menu. */
@@ -275,6 +279,7 @@ export function htmlMeja(
     suara = true,
     terbaru = null,
     bagi = false,
+    lewat = null,
     konfirmasi = false,
     garis = false,
   }: OpsiMeja = {},
@@ -286,8 +291,8 @@ export function htmlMeja(
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}${bagi ? ' bagi-baru' : ''}">` +
     htmlBar(partai, nomorPartai, dijeda, latihan, suara) +
-    htmlLawan(kocokan, UTARA, 'utara', berjalan, partai.status === 'ringkasan') +
-    htmlLawan(kocokan, BARAT, 'barat', berjalan, partai.status === 'ringkasan') +
+    htmlLawan(kocokan, UTARA, 'utara', berjalan, partai.status === 'ringkasan', lewat === UTARA) +
+    htmlLawan(kocokan, BARAT, 'barat', berjalan, partai.status === 'ringkasan', lewat === BARAT) +
     `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian, terbaru, garis, pilihan)}` +
     `<p class="status" role="status">${teksStatus(partai)}<span class="terakhir">${teksLangkahTerakhir(kocokan)}</span></p>` +
     (pilihan ? htmlPilihSisi(kocokan, pilihan) : '') +
@@ -295,8 +300,8 @@ export function htmlMeja(
     (partai.status === 'ringkasan' ? htmlRingkasan(partai) : '') +
     `</section>` +
     (tampilBantuan ? htmlBantuan(kocokan) : '') +
-    htmlLawan(kocokan, TIMUR, 'timur', berjalan, partai.status === 'ringkasan') +
-    htmlTangan(partai, pilihan?.kartu.id ?? null, saran?.kartu.id ?? null) +
+    htmlLawan(kocokan, TIMUR, 'timur', berjalan, partai.status === 'ringkasan', lewat === TIMUR) +
+    htmlTangan(partai, pilihan?.kartu.id ?? null, saran?.kartu.id ?? null, lewat === PEMAIN_MANUSIA) +
     htmlTirai(konfirmasi, dijeda) +
     `</div>`
   );

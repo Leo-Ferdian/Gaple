@@ -11,6 +11,47 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-03 | Pengembangan ponsel dibatalkan
+
+- **Tujuan:** fokus ke desktop dulu; ponsel dibahas lagi bila ada pembaruan yang disetujui.
+- **Dikerjakan:** semua pengembangan ponsel dari 0.27.0 dan 0.29.2 dihapus: blok CSS ponsel (bingkai tipis, bar tiga baris, menu satu kolom, tangan tidak menempel), aturan layar sangat pendek (`max-height: 520px`), dan area rantai tegak (`AREA_SEMPIT` kembali 600x440, ambang tes sempit kembali 0,6); tes "area ponsel tegak" dihapus. Penyebutan ponsel di README dan SKILSS dihapus.
+- **Keputusan:** pengaturan tema, perbaikan layar pendek di desktop (0.29.1), dan seluruh animasi tetap. Aturan responsif sederhana yang sudah ada sebelum tahap ponsel (lawan sebaris di layar sempit, `viewport`) dibiarkan karena tidak mengganggu desktop. Entri DEVLOG lama tentang ponsel dibiarkan sebagai riwayat.
+- **Tes:** 1 tes dihapus; 277 tes lolos.
+- **Berikutnya:** transisi layar, atau fitur desktop lain.
+
+---
+
+## 2026-11-02 | Animasi tahap dua: papan skor berhitung, ketukan, balon Lewat, jeda berpikir
+
+- **Tujuan:** menyelesaikan sisa ide animasi (papan skor berhitung, pendaratan kartu dan "lewat", jeda berpikir bervariasi) dan membuat pratinjau sisi lebih terlihat.
+- **Dikerjakan:** (1) Papan skor berhitung: angka markah naik pelan (700 ms) dari nilai lama ke baru saat kocokan berakhir (`hitungMarkah` di `main.ts`). (2) Ketukan: kartu yang baru mendarat sedikit membesar lalu mengendap (`ketuk`). (3) Balon "Lewat" muncul di dekat pemain yang lewat (`lewat-cap`). (4) Jeda berpikir: `jedaBerpikir()` di `controller.ts` mengalikan jeda dasar dengan jumlah pilihan (lewat 0,55x, satu kartu 0,7x, banyak pilihan sampai 1,5x) dengan variasi kecil dari panjang riwayat, tanpa memakai pengacak permainan. Hanya pada tingkat animasi Penuh. (5) Pratinjau sisi: bayangan kini lebih terang (isi krem, garis tebal, cahaya kuning).
+- **Keputusan:** transisi layar belum dikerjakan. Pada tingkat Kurang dan Mati jeda tetap; balon Lewat tanpa gerak bila animasi Mati atau sistem meminta gerak dikurangi.
+- **Tes:** 2 tes baru (balon Lewat, jeda berpikir); 278 tes lolos.
+- **Berikutnya:** transisi layar, atau tata letak khusus ponsel mendatar.
+
+---
+
+## 2026-11-02 | Pemeriksaan ponsel (emulasi sentuh)
+
+- **Tujuan:** memeriksa tampilan ponsel tanpa perangkat nyata: 360x640, 390x844, dan mendatar 740x360, dengan sentuhan (Playwright, `isMobile`, `hasTouch`).
+- **Dikerjakan:** hasil periksa: tidak ada geser samping dan tidak ada tombol di bawah 40 px di ketiga ukuran. Temuan: di 360x640 halaman lebih tinggi 82 px sehingga kartu tangan terpotong. Perbaikan: tinggi maksimal gambar rantai ponsel kini `min(48svh, max(200px, 100svh - 440px))` sehingga seluruh meja muat tepat satu layar. Ditambah aturan `max-height: 520px` (ponsel mendatar): kartu tangan 40 px, gambar rantai maksimal 42vh, tangan tidak menempel.
+- **Keputusan:** ponsel mendatar tetap kompromi: halaman masih bisa digulir (tinggi 553 px di layar 360 px) dan rantai kecil. Tidak dibuat tata letak khusus.
+- **Belum dikerjakan:** uji di perangkat nyata (bunyi, getar, gestur, bilah alamat browser).
+- **Tes:** tidak ada perubahan; 276 tes lolos.
+- **Berikutnya:** tata letak khusus mendatar bila diperlukan, atau sisa ide animasi.
+
+---
+
+## 2026-11-01 | Perbaikan layar pendek
+
+- **Tujuan:** pada layar setinggi sekitar 760 px, tangan yang menempel di bawah menutupi tombol Kiri/Kanan.
+- **Dikerjakan:** tinggi maksimal gambar rantai kini `min(52vh, max(260px, 100vh - 440px))` di `style.css`, sehingga status, tombol sisi, dan tangan muat tanpa tertutup. Pada layar tinggi tidak ada perubahan.
+- **Keputusan:** hanya CSS; tidak ada perubahan tata letak rantai. Diperiksa lewat tangkapan layar 1100x760 dan 1100x900.
+- **Tes:** tidak ada perubahan; 276 tes lolos.
+- **Berikutnya:** uji di ponsel nyata, atau sisa ide animasi.
+
+---
+
 ## 2026-11-01 | CI dan rilis GitHub
 
 - **Tujuan:** pemeriksaan otomatis dan rilis yang dibuat dengan satu tag.

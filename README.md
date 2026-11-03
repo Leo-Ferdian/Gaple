@@ -6,7 +6,7 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.29.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-276%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.30.1-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-277%20lolos-brightgreen)
 
 </div>
 
@@ -20,10 +20,10 @@ Anda (Selatan) berpasangan dengan komputer (Utara) melawan Barat dan Timur. Satu
 - **Tiga tingkat AI:** Mudah, Sedang (menilai tiap langkah), dan Sulit (menduga tangan lawan, lalu mensimulasikan langkah).
 - **Bantuan hitung:** kartu yang sudah keluar, sisa per angka, dan peluang kartu lawan.
 - **Mode Latihan:** pertandingan biasa dengan Bantuan hitung dan tombol Saran (langkah terbaik menurut AI Sulit).
-- **Rantai kartu rapi:** kartu yang sudah keluar tidak pernah berpindah, belokan siku, balak di sudut berdiri melintang, dan ukuran kartu menyesuaikan layar desktop maupun ponsel.
-- **Terasa hidup:** kartu meluncur dari kursi pemain, kartu dibagi satu per satu, penanda giliran, +markah dan cap bonus, kontrol papan ketik (Tab, Enter, panah, Esc, P). Kartu sisa lawan terbuka di akhir kocokan, zoom halus saat rantai mengecil, pratinjau bayangan di dua ujung saat memilih sisi. Tingkat animasi Penuh, Kurang, atau Mati di menu; otomatis mati bila sistem meminta gerak dikurangi.
+- **Rantai kartu rapi:** kartu yang sudah keluar tidak pernah berpindah, belokan siku, balak di sudut berdiri melintang, dan ukuran kartu menyesuaikan layar desktop.
+- **Terasa hidup:** kartu meluncur dari kursi pemain, kartu dibagi satu per satu, penanda giliran, +markah dan cap bonus, kontrol papan ketik (Tab, Enter, panah, Esc, P). Kartu sisa lawan terbuka di akhir kocokan, zoom halus saat rantai mengecil, pratinjau bayangan di dua ujung saat memilih sisi, papan skor berhitung, ketukan kartu, balon Lewat, dan jeda berpikir komputer yang menyesuaikan jumlah pilihan. Tingkat animasi Penuh, Kurang, atau Mati di menu; otomatis mati bila sistem meminta gerak dikurangi.
 - **Tampilan warung malam:** meja beludru di bingkai kayu, papan skor kapur, dan efek suara sintetis (bisa dimatikan).
-- **Tema warna:** Hijau, Biru, Anggur, dan Kontras tinggi; tampilan ponsel tersendiri (area rantai tegak, menu satu kolom).
+- **Tema warna:** Hijau, Biru, Anggur, dan Kontras tinggi.
 - **Pengaturan tersimpan** di peramban.
 
 ## Aturan singkat

@@ -728,7 +728,7 @@ button:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 52vh;
+  max-height: min(52vh, max(260px, calc(100vh - 440px))); /* layar pendek: sisakan ruang untuk status, tombol sisi, dan tangan */
 }
 .letak.ujung .badan {
   stroke: var(--aksen);
@@ -917,7 +917,15 @@ button:focus-visible {
 .letak[data-baru] {
   transform-box: fill-box;
   transform-origin: center;
-  animation: meluncur 0.5s cubic-bezier(0.2, 0.85, 0.25, 1) backwards;
+  animation:
+    meluncur 0.5s cubic-bezier(0.2, 0.85, 0.25, 1) backwards,
+    ketuk 0.26s ease-out 0.5s;
+}
+/* kartu mendarat: sedikit membesar lalu mengendap, seperti diketukkan ke meja */
+@keyframes ketuk {
+  40% {
+    transform: scale(1.09);
+  }
 }
 .letak[data-dari='selatan'] {
   --dx: 0px;
@@ -1304,150 +1312,6 @@ button:focus-visible {
   stroke-width: 1;
 }
 
-/* ======================================================================
-   Ponsel (lebar <= 640px): bingkai tipis, bar tiga baris, menu satu kolom,
-   rantai memakai area tegak, tangan tidak menempel
-   ====================================================================== */
-@media (max-width: 640px) {
-  :root {
-    --lebar-tangan: min(56px, calc((100vw - 64px) / 7));
-  }
-  #app {
-    padding: 6px;
-  }
-  .meja {
-    min-height: calc(100svh - 12px);
-    padding: 8px;
-    gap: 6px;
-    border-width: 8px;
-  }
-  .meja.layar {
-    padding: 18px 12px;
-  }
-
-  /* bar: papan skor, info, lalu tombol */
-  .bar {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-  .papan {
-    justify-content: space-between;
-    padding: 6px 14px 4px;
-    gap: 12px;
-  }
-  .markah {
-    min-width: 0;
-    flex: 1;
-  }
-  .markah .angka {
-    font-size: 1.5rem;
-  }
-  .info {
-    justify-self: stretch;
-    text-align: center;
-    font-size: 0.8rem;
-    padding: 3px 8px;
-  }
-  .aksi {
-    gap: 6px;
-  }
-  .aksi button {
-    flex: 1;
-    min-height: 44px;
-    padding: 0 8px;
-    font-size: 0.9rem;
-  }
-
-  /* meja */
-  .rangkaian-svg {
-    max-height: 48svh;
-    margin: 0 auto;
-  }
-  .meja.dengan-bantuan .rangkaian-svg {
-    max-height: 40svh;
-  }
-  .status {
-    font-size: 0.95rem;
-  }
-  .tangan,
-  .meja.dengan-bantuan .tangan {
-    position: relative;
-    background: none;
-    padding-top: 18px;
-    gap: 3px;
-  }
-  .ringkasan {
-    padding: 10px 14px 12px;
-    width: 100%;
-  }
-  .pilih-sisi button,
-  .ringkasan button,
-  .saran-baris button {
-    min-height: 48px;
-  }
-  .bantuan {
-    font-size: 0.75rem;
-    padding: 6px 8px;
-  }
-
-  /* dialog */
-  .dialog {
-    min-width: 0;
-    width: calc(100% - 32px);
-    padding: 18px 16px 20px;
-  }
-  .dialog .tombol-baris button {
-    flex: 1;
-  }
-
-  /* menu */
-  .papan-nama {
-    padding: 22px 14px 16px;
-  }
-  .papan-nama h1 {
-    font-size: 2.4rem;
-  }
-  .hias span {
-    width: 54px;
-  }
-  .hias-kiri {
-    left: -14px;
-    top: -18px;
-  }
-  .hias-kanan {
-    right: -14px;
-    bottom: -18px;
-  }
-  .pengaturan {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .ubin .pilihan {
-    flex: 1 1 40%;
-    justify-content: center;
-  }
-  .ubin .pilihan small {
-    flex-basis: 100%;
-    text-align: center;
-  }
-  .mulai {
-    gap: 14px;
-  }
-  .mulai-aksi {
-    width: 100%;
-  }
-  .layar button.utama {
-    width: 100%;
-    max-width: 320px;
-  }
-  .saran-awal {
-    font-size: 0.9rem;
-  }
-  .aturan {
-    font-size: 0.9rem;
-  }
-}
-
 /* Tingkat animasi (pengaturan.animasi -> data-animasi pada <html>) */
 :root[data-animasi='mati'] *,
 :root[data-animasi='mati'] *::before,
@@ -1472,7 +1336,8 @@ button:focus-visible {
   display: none;
 }
 :root[data-animasi='kurang'] .letak[data-baru] {
-  animation-duration: 0.2s;
+  animation-duration: 0.2s, 0.14s;
+  animation-delay: 0s, 0.2s;
 }
 
 /* akhir kocokan: kartu sisa lawan dibalik satu per satu */
@@ -1547,21 +1412,22 @@ button:focus-visible {
 /* pratinjau sisi: bayangan kartu di ujung rantai yang boleh dipakai */
 .bayangan {
   cursor: pointer;
-  opacity: 0.6;
-  animation: bayang 1.4s ease-in-out infinite;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 7px rgba(242, 184, 75, 0.95));
+  animation: bayang 1.1s ease-in-out infinite;
 }
 .bayangan .badan {
-  fill: rgba(243, 233, 207, 0.35);
+  fill: rgba(243, 233, 207, 0.6);
   stroke: var(--aksen);
-  stroke-width: 3;
-  stroke-dasharray: 8 5;
+  stroke-width: 5;
+  stroke-dasharray: 10 6;
 }
 .bayangan .titik {
-  opacity: 0.55;
+  opacity: 0.8;
 }
 @keyframes bayang {
   50% {
-    opacity: 0.95;
+    opacity: 0.5;
   }
 }
 .meja:has(button[data-sisi='kiri']:is(:hover, :focus-visible)) .bayangan[data-sisi='kiri'],
@@ -1581,4 +1447,63 @@ button:focus-visible {
   .bayangan {
     animation: none;
   }
+}
+
+/* balon "Lewat" di dekat pemain yang baru lewat */
+.lawan.lewat-baru,
+.tangan.lewat-baru {
+  position: relative;
+}
+.lewat-cap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 12px;
+  border-radius: 12px;
+  background: var(--aksen);
+  color: #2a1a08;
+  font-family: var(--slab);
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+  animation: lewat-muncul 1.4s ease-out forwards;
+}
+@keyframes lewat-muncul {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.1);
+  }
+  25% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(1);
+  }
+}
+:root[data-animasi='mati'] .lewat-cap {
+  animation: none;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lewat-cap {
+    animation: none;
+  }
+}
+.tangan .lewat-cap {
+  top: -26px;
+}
+.lawan .lewat-cap {
+  top: 100%;
+  margin-top: 4px;
 }

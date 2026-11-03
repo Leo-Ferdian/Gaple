@@ -46,6 +46,20 @@ export function adaLangkahOtomatis(partai: Partai): boolean {
   return partai.status === STATUS_BERJALAN && !menungguManusia(partai);
 }
 
+/**
+ * Lama komputer "berpikir" sebelum melangkah, dalam milidetik. `dasar` dikalikan jumlah pilihan:
+ * lewat atau satu-satunya kartu terasa cepat, banyak pilihan terasa lebih lama. Sedikit variasi
+ * ditentukan dari panjang riwayat (bukan acak), jadi tidak memakai pengacak permainan.
+ */
+export function jedaBerpikir(partai: Partai, dasar: number): number {
+  if (dasar <= 0 || partai.kocokan === null) return Math.max(0, dasar);
+  const { kocokan } = partai;
+  const n = kartuLegalPemain(kocokan, kocokan.giliran).length;
+  const faktor = n === 0 ? 0.55 : n === 1 ? 0.7 : Math.min(1.5, 0.85 + 0.12 * n);
+  const getar = 0.9 + ((kocokan.riwayat.length * 7) % 5) * 0.05;
+  return Math.round(dasar * faktor * getar);
+}
+
 /** Pemilih langkah untuk tiap tingkat AI. */
 const KEBIJAKAN_AI: Readonly<Record<TingkatAi, Kebijakan>> = {
   mudah: pilihLangkahAcak,

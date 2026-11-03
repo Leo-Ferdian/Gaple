@@ -346,7 +346,7 @@ for (const [nama, area] of kasusArea) {
 test('rata-rata skala dijaga (kartu tidak cepat mengecil walau posisinya terkunci)', () => {
   const batas: readonly (readonly [string, Area, number])[] = [
     ['luas', AREA_LUAS, 0.75],
-    ['sempit', AREA_SEMPIT, 0.55],
+    ['sempit', AREA_SEMPIT, 0.6],
   ];
   for (const [nama, area, minimal] of batas) {
     let total = 0;

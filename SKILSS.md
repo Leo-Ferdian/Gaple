@@ -10,7 +10,7 @@ Kemampuan dan pengetahuan yang dibutuhkan untuk mengerjakan proyek ini, dan temp
 | Probabilitas dan pemrograman dinamis          | Pelacak kartu dan peluang lawan                                   | `src/pelacak.ts`                                           |
 | Simulasi Monte Carlo (determinisasi)          | AI Sulit                                                          | `src/ai-sulit.ts`, `npm run demo:sulit`                    |
 | Geometri 2D                                   | Tata letak rantai, belokan, balak di sudut, kamera                | `src/tampilan/tata-rantai.ts`                              |
-| SVG, HTML, CSS                                | Kartu, meja, layar menu, tampilan ponsel                          | `src/tampilan/`, `style.css`                               |
+| SVG, HTML, CSS                                | Kartu, meja, layar menu                                           | `src/tampilan/`, `style.css`                               |
 | Pengujian                                     | Tes sifat atas ribuan kocokan acak, tes kekuatan AI               | `test/`, `bantu/gerbang.ts`                                |
 | Git dan GitHub                                | CI, rilis                                                         | `.github/workflows/ci.yml`, `SECURITY.md`                  |
 
@@ -18,4 +18,4 @@ Kemampuan dan pengetahuan yang dibutuhkan untuk mengerjakan proyek ini, dan temp
 
 - Menulis tes bersama kode, dan mengujinya dengan data acak berbenih, bukan satu contoh saja.
 - Mencatat keputusan di `docs/DEVLOG.md` dan memperbarui `docs/GUIDE.md`.
-- Memverifikasi tampilan di peramban (desktop dan ponsel) setelah mengubah `src/tampilan/` atau `style.css`.
+- Memverifikasi tampilan di peramban (desktop) setelah mengubah `src/tampilan/` atau `style.css`.

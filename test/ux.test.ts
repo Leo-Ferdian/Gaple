@@ -5,8 +5,9 @@ import { mulaiPartai, bagiKocokan } from '../src/partai.ts';
 import type { Partai, PartaiBerjalan, PartaiRingkasan } from '../src/partai.ts';
 import { langkahAcakPartai } from '../src/simulasi.ts';
 import { aplikasiBaru, mulaiPermainan, PENGATURAN_BAWAAN, rapikanPengaturan, TEMA_TERSEDIA } from '../src/controller.ts';
-import { AREA_LUAS, AREA_SEMPIT, tataRantai, indeksAnchor } from '../src/tampilan/tata-rantai.ts';
-import { pilihanKartu } from '../src/controller.ts';
+import { AREA_LUAS, tataRantai, indeksAnchor } from '../src/tampilan/tata-rantai.ts';
+import { pilihanKartu, jedaBerpikir } from '../src/controller.ts';
+import { kartuLegalPemain } from '../src/kocokan.ts';
 import { hitungBayangan } from '../src/tampilan/bayangan.ts';
 import { kartuLegal, letakkan } from '../src/meja.ts';
 import { htmlMeja, teksPengumuman, kursiPemain } from '../src/tampilan/meja-html.ts';
@@ -153,11 +154,6 @@ test('tema: bawaan hijau, nilai asing diganti bawaan, menu menandai tema terpili
   }
 });
 
-test('area ponsel tegak (lebih tinggi daripada lebar) supaya kartu lebih besar di layar sempit', () => {
-  assert.ok(AREA_SEMPIT.tinggi > AREA_SEMPIT.lebar);
-  assert.ok(AREA_LUAS.lebar > AREA_LUAS.tinggi);
-});
-
 test('akhir kocokan: kartu sisa lawan terbuka dengan jumlah titiknya; saat berjalan tetap tertutup', () => {
   const akhir = ringkasan(false);
   const html = htmlMeja(akhir);
@@ -213,4 +209,37 @@ test('pratinjau sisi: bayangan jatuh tepat di tempat kartu itu akan berada, di k
   assert.ok(diuji > 10, `hanya ${diuji} yang diuji`);
   assert.ok(diMeja > 0, 'bayangan di meja tidak pernah teruji');
   assert.doesNotMatch(htmlMeja(partaiBerjalan(3, 8)), /class="bayangan"/);
+});
+
+test('balon Lewat: hanya di pemain yang baru lewat', () => {
+  const partai = partaiBerjalan(5, 8);
+  assert.doesNotMatch(htmlMeja(partai), /lewat-cap/);
+  for (const pemain of [0, 1, 2, 3] as const) {
+    const html = htmlMeja(partai, { lewat: pemain });
+    assert.equal(hitung(html, /class="lewat-cap"/g), 1, `pemain ${pemain}`);
+    assert.equal(hitung(html, /lewat-baru/g), 1, `pemain ${pemain}`);
+  }
+  assert.match(htmlMeja(partai, { lewat: 0 }), /class="tangan[^"]*lewat-baru"/);
+});
+
+test('jeda berpikir: nol tetap nol, lewat dan satu kartu lebih cepat dari banyak pilihan, batas wajar', () => {
+  assert.equal(jedaBerpikir(partaiBerjalan(3, 6), 0), 0);
+  const hasil: { n: number; ms: number }[] = [];
+  for (let benih = 1; benih <= 60; benih++) {
+    for (const langkah of [4, 9, 15]) {
+      const partai = partaiBerjalan(benih, langkah);
+      const { kocokan } = partai;
+      const n = kartuLegalPemain(kocokan, kocokan.giliran).length;
+      const ms = jedaBerpikir(partai, 700);
+      assert.ok(ms >= 300 && ms <= 1200, `${ms} ms untuk ${n} pilihan`);
+      hasil.push({ n, ms });
+    }
+  }
+  const rata = (f: (n: number) => boolean): number => {
+    const x = hasil.filter((h) => f(h.n));
+    return x.reduce((j, h) => j + h.ms, 0) / x.length;
+  };
+  assert.ok(rata((n) => n <= 1) < rata((n) => n >= 3), 'sedikit pilihan harus lebih cepat');
+  const sama = partaiBerjalan(7, 9);
+  assert.equal(jedaBerpikir(sama, 700), jedaBerpikir(sama, 700));
 });

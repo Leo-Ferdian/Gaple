@@ -579,6 +579,8 @@ Animasi (kartu meluncur, bagi kartu, markah, cap bonus, konfeti) hanya CSS di `s
 
 Tambahan tahap animasi: pengaturan `animasi` (penuh, kurang, mati) dipasang sebagai `data-animasi` pada `<html>`. Zoom halus: `zoomHalus()` di `main.ts` membandingkan `data-skala` grup `.dunia` dengan gambar sebelumnya lalu menganimasikan transform. Pratinjau sisi: `src/tampilan/bayangan.ts` (`hitungBayangan`) menata rantai seandainya kartu dipasang di tiap ujung, lalu `svgRangkaian` menggambar `.bayangan` yang bisa diklik. Kartu sisa lawan terbuka lewat kelas `.lawan.terbuka` pada layar ringkasan.
 
+Tahap dua: `hitungMarkah()` di `main.ts` menghitung naik angka markah; kartu yang mendarat diberi animasi `ketuk`; pemain yang lewat diberi balon `.lewat-cap` (opsi `lewat` pada `htmlMeja`); `jedaBerpikir()` di `controller.ts` mengatur jeda komputer menurut jumlah pilihan (hanya pada animasi Penuh).
+
 ## CI dan rilis
 
 - `.github/workflows/ci.yml`: tiap push dan pull request menjalankan typecheck, aturan, format, tes, build, dan gerbang.
