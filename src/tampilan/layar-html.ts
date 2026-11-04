@@ -52,13 +52,13 @@ export function teksRingkasPilihan(pengaturan: Pengaturan): string {
   return `${namaDari(PILIHAN_MODE, pengaturan.mode)} · ${namaDari(PILIHAN_FORMAT, pengaturan.format)} · Lawan ${namaDari(PILIHAN_AI, pengaturan.ai)}`;
 }
 
-/** Denah duduk: Anda di selatan, Utara mitra Anda, Barat dan Timur lawan. */
+/** Denah duduk: Anda di bawah, Rekan di seberang, Lawan Kiri dan Lawan Kanan di samping. */
 function htmlDenah(): string {
   return (
-    `<figure class="denah" role="img" aria-label="Denah duduk: Anda di selatan, Utara mitra Anda, Barat dan Timur lawan">` +
-    `<span class="kursi utara">Utara<small>mitra</small></span>` +
-    `<span class="kursi barat lawan">Barat<small>lawan</small></span>` +
-    `<span class="kursi timur lawan">Timur<small>lawan</small></span>` +
+    `<figure class="denah" role="img" aria-label="Denah duduk: Anda di bawah, Rekan di seberang Anda, Lawan Kiri dan Lawan Kanan di samping">` +
+    `<span class="kursi utara">Rekan<small>tim Anda</small></span>` +
+    `<span class="kursi barat lawan">Lawan Kiri</span>` +
+    `<span class="kursi timur lawan">Lawan Kanan</span>` +
     `<span class="kursi selatan">Anda</span>` +
     `</figure>`
   );
@@ -80,7 +80,7 @@ function radio(nama: string, pilihan: readonly Pilihan[], terpilih: string, akti
 }
 
 const ATURAN = [
-  '28 kartu, tiap pemain 7. Anda (Selatan) berpasangan dengan Utara melawan Barat dan Timur.',
+  '28 kartu, tiap pemain 7. Anda berpasangan dengan Rekan (komputer) melawan Lawan Kiri dan Lawan Kanan.',
   'Kocokan pertama tiap partai dibuka pemegang kartu sesuai poin pertandingan (poin 0-0: kartu 0-0). Sesudah itu wajib dibuka dengan balak, oleh penutup kocokan sebelumnya (setelah tabrak: pemain dari tim pemenang dengan titik paling sedikit). Tanpa balak, hak pindah ke pemain berikutnya.',
   'Kartu disambung ke ujung yang angkanya sama. Tidak punya kartu cocok berarti lewat.',
   'Habis: pemain pertama yang menghabiskan kartu menutup. Tim lawannya mendapat markah sebesar total titik sisa kedua pemainnya, ditambah bonus bila ada.',
@@ -96,7 +96,7 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<header class="papan-nama">` +
     `<div class="hias" aria-hidden="true"><span class="hias-kiri">${svgKartu(6, 6, ARAH_DATAR)}</span><span class="hias-kanan">${svgKartu(6, 3, ARAH_DATAR)}</span></div>` +
     `<h1>Gaple <span class="dua">2vs2</span></h1>` +
-    `<p class="ket">Anda dan Utara melawan Barat dan Timur.</p>` +
+    `<p class="ket">Anda dan Rekan melawan Lawan Kiri dan Lawan Kanan.</p>` +
     `</header>` +
     `<div class="pengaturan">` +
     `<fieldset><legend>Mode</legend><div class="ubin">${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</div></fieldset>` +

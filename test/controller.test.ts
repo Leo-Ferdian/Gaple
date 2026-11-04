@@ -219,7 +219,7 @@ test('meja: langkah terakhir ditulis di status', () => {
   while (p.status === STATUS_BERJALAN && p.kocokan.riwayat.length < 2) {
     p = langkah(p, acak);
   }
-  assert.match(htmlMeja(p), /<span class="terakhir">(Anda|Barat|Utara|Timur) (lewat|memainkan \d-\d)</);
+  assert.match(htmlMeja(p), /<span class="terakhir">(Anda|Lawan Kiri|Rekan|Lawan Kanan) (lewat|memainkan \d-\d)</);
 });
 
 test('meja: tombol jeda berganti label', () => {

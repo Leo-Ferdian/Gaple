@@ -323,7 +323,7 @@ Alur tiga lapis (kocokan, partai, pertandingan) ada di bagian 4 brief proyek.
 | `giliranBerikutnya(pemain)` | nomor pemain | nomor pemain | Searah jarum jam: 0, 1, 2, 3, 0. |
 | `timPemain(pemain)` | nomor pemain | 0 atau 1 | Pemain 0 dan 2 tim 0, pemain 1 dan 3 tim 1. |
 
-Konstanta: `ANGKA_TERBESAR` (6), `JUMLAH_KARTU` (28), `JUMLAH_PEMAIN` (4), `KARTU_PER_PEMAIN` (7), `NAMA_PEMAIN` (Selatan, Barat, Utara, Timur). `kocokan.ts` meneruskan (re-export) `NAMA_PEMAIN`, `giliranBerikutnya`, dan `timPemain` supaya impor lama tetap jalan.
+Konstanta: `ANGKA_TERBESAR` (6), `JUMLAH_KARTU` (28), `JUMLAH_PEMAIN` (4), `KARTU_PER_PEMAIN` (7), `NAMA_PEMAIN` (Anda, Lawan Kiri, Rekan, Lawan Kanan; nomor kursi 0 sampai 3 tetap, kelas CSS tetap berarah mata angin). `kocokan.ts` meneruskan (re-export) `NAMA_PEMAIN`, `giliranBerikutnya`, dan `timPemain` supaya impor lama tetap jalan.
 
 ### `src/meja.ts`
 
@@ -483,11 +483,12 @@ Pemeriksa sendiri diuji di `test/gerbang.test.ts` dengan kocokan yang sengaja di
 
 | Fungsi | Tugas |
 | --- | --- |
+| `pilihLangkahSedangCepat(state, acak)` | Sama tanpa peluang pelacak; jauh lebih cepat. |
 | `pilihLangkahSedang(state, acak)` | Memilih satu langkah (`main` atau `lewat`) untuk pemain yang sedang giliran. Murni, tidak mengubah state. Seri dipilih acak dengan `acak` yang dioper (jadi bisa diulang dengan benih sama). |
 | `angkaTidakDimiliki(state, pemain)` | Angka yang terbukti tidak dimiliki pemain, dibaca dari riwayat lewat (angka di dua ujung meja saat ia lewat). |
 | `BOBOT` | Bobot penilaian (menutup, bonus double dan triplet, titik, balak, lanjutan, tanpa lanjutan, lawan lewat, rekan lewat). Disetel di satu tempat. |
 
-Cara menilai: tiap pasangan (kartu, sisi) yang legal diberi nilai; yang tertinggi dipilih. Yang dinilai: menutup kocokan (paling utama), membuang kartu berat dan balak lebih dulu, menyisakan ujung yang masih bisa dilanjutkan dari tangan sendiri, menjadikan ujung angka yang terbukti tidak dimiliki lawan, dan menghindari angka yang terbukti tidak dimiliki rekan. AI hanya membaca tangannya sendiri dan riwayat meja (dijaga tes: menukar tangan pemain lain tidak mengubah pilihan). Belum ada: menghitung kartu yang sudah keluar dan peluang kartu lawan (tahap 5).
+Cara menilai: tiap pasangan (kartu, sisi) yang legal diberi nilai; yang tertinggi dipilih. Yang dinilai: menutup kocokan (paling utama), membuang kartu berat dan balak lebih dulu, menyisakan ujung yang masih bisa dilanjutkan dari tangan sendiri, menjadikan ujung angka yang terbukti tidak dimiliki lawan, dan menghindari angka yang terbukti tidak dimiliki rekan. AI hanya membaca tangannya sendiri dan riwayat meja (dijaga tes: menukar tangan pemain lain tidak mengubah pilihan). Sejak 0.31.0 ada suku peluang: pelacak menghitung peluang tiap lawan tidak punya kartu untuk kedua ujung setelah langkah itu (`BOBOT.lawanHarusLewat`, 20 dikali peluang). Menambah kekuatan sekitar 13 poin persentase melawan versi tanpa suku itu. `pilihLangkahSedangCepat` adalah versi tanpa pelacak (dipakai simulasi AI Sulit supaya cepat); `nilaiSemuaLangkahSedang` memberi nilai tiap langkah. Bila jumlah kartu tidak cocok dengan kocokan utuh (keadaan buatan di tes), pelacak dilewati.
 
 ### `src/pelacak.ts`
 
@@ -505,10 +506,10 @@ Peluang dihitung TEPAT, bukan ditebak: kartu yang belum terlihat dibagikan ke ti
 
 | Fungsi | Tugas |
 | --- | --- |
-| `pilihLangkahSulit(state, acak, opsi?)` | Memilih satu langkah (`main` atau `lewat`) untuk pemain yang sedang giliran. Murni; seri dipilih acak dengan `acak` yang dioper. `opsi.dugaan` = banyak dugaan pembagian (bawaan `DUGAAN_BAWAAN` = 60). |
+| `pilihLangkahSulit(state, acak, opsi?)` | Memilih satu langkah (`main` atau `lewat`) untuk pemain yang sedang giliran. Murni; seri dipilih acak dengan `acak` yang dioper. `opsi.dugaan` = banyak dugaan pembagian (bawaan `DUGAAN_BAWAAN` = 60); `opsi.campuran` = bobot nilai penilaian Sedang yang ditambahkan ke hasil simulasi (bawaan `CAMPURAN_BAWAAN` = 0,3); `opsi.simulasi` = `'cepat'` (bawaan) atau `'pelacak'`. |
 | `nilaiLangkahSulit(state, acak, opsi?)` | Nilai tiap langkah legal (`{kartu, sisi, nilai}`), terbaik dulu; kosong bila harus lewat. Dipakai juga untuk tombol Saran. |
 
-Cara kerja (determinisasi + simulasi): dari `pandangan` pemain, pelacak menarik dugaan tangan tiga pemain lain (seragam, cocok dengan jumlah kartu dan riwayat lewat). Untuk tiap dugaan, tiap langkah legal dicoba lalu kocokan dimainkan sampai selesai oleh empat AI Sedang; nilai langkah = rata-rata (markah tambahan lawan - markah tambahan tim sendiri), bonus dan tabrak ikut terhitung. Tidak pernah membaca tangan pemain lain (tes: menukar kartu lawan tidak mengubah nilai). Satu keputusan rata-rata beberapa milidetik, paling lama sekitar 0,2 detik. Dengan sedikit dugaan (8) AI ini berisik dan kira-kira setara Sedang; 30 dugaan sudah jelas lebih kuat; 60 dipakai sebagai bawaan. Yang tidak dimodelkan: pertimbangan skor partai (hanya satu kocokan yang disimulasikan) dan petunjuk dari pilihan langkah lawan.
+Cara kerja (determinisasi + simulasi): dari `pandangan` pemain, pelacak menarik dugaan tangan tiga pemain lain (seragam, cocok dengan jumlah kartu dan riwayat lewat). Untuk tiap dugaan, tiap langkah legal dicoba lalu kocokan dimainkan sampai selesai oleh empat AI Sedang cepat; nilai langkah = rata-rata (markah tambahan lawan - markah tambahan tim sendiri), bonus dan tabrak ikut terhitung. Tidak pernah membaca tangan pemain lain (tes: menukar kartu lawan tidak mengubah nilai). Satu keputusan rata-rata beberapa milidetik, paling lama sekitar 0,2 detik. Dengan sedikit dugaan (8) AI ini berisik dan kira-kira setara Sedang; 30 dugaan sudah jelas lebih kuat; 60 dipakai sebagai bawaan. Sejak 0.31.0 nilai penilaian Sedang (dikali 0,3) ditambahkan ke hasil simulasi; diukur menaikkan Sulit dari sekitar 55% ke 60% melawan Sedang baru, sedangkan simulasi memakai Sedang dengan pelacak tidak lebih baik dan jauh lebih lambat. Yang tidak dimodelkan: pertimbangan skor partai (hanya satu kocokan yang disimulasikan) dan petunjuk dari pilihan langkah lawan.
 
 **Mode Latihan:** pengaturan `mode` (`'pertandingan'` atau `'latihan'`). Latihan adalah pertandingan yang sama (format, AI, poin) dengan dua tambahan: Bantuan hitung selalu tampil, dan tombol Saran pada giliran Anda yang menampilkan kartu dan sisi terbaik menurut AI Sulit (`saranManusia` di controller; kartunya disorot). Saran hilang setelah Anda main.
 
@@ -516,10 +517,10 @@ Cara kerja (determinisasi + simulasi): dari `pandangan` pemain, pelacak menarik 
 
 | Pemain | Nomor | Tim |
 | --- | --- | --- |
-| Selatan (manusia) | 0 | 0 |
-| Barat | 1 | 1 |
-| Utara (partner) | 2 | 0 |
-| Timur | 3 | 1 |
+| Anda (selatan, manusia) | 0 | 0 |
+| Lawan Kiri (barat) | 1 | 1 |
+| Rekan (utara) | 2 | 0 |
+| Lawan Kanan (timur) | 3 | 1 |
 
 Giliran searah jarum jam: 0, 1, 2, 3. Tim = nomor pemain mod 2.
 

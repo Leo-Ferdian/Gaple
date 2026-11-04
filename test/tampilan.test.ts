@@ -82,7 +82,7 @@ test('meja: bukan giliran Anda, semua kartu tangan dinonaktifkan', () => {
   if (partai.kocokan.giliran === PEMAIN_MANUSIA) return; // benih ini kebetulan Anda yang membuka
   const html = htmlMeja(partai);
   assert.equal(hitung(html, /class="kartu-tangan legal"/g), 0);
-  assert.match(html, /Giliran (Barat|Utara|Timur)/);
+  assert.match(html, /Giliran (Lawan Kiri|Rekan|Lawan Kanan)/);
 });
 
 test('meja: rangkaian menampilkan semua kartu dan menandai dua ujung', () => {
@@ -97,9 +97,9 @@ test('meja: lawan hanya tampil sebagai punggung dengan jumlah sisa kartunya', ()
   const partai = sampaiGilirannya(7, 14);
   const html = htmlMeja(partai);
   const lawan: [NomorPemain, string][] = [
-    [1, 'Barat'],
-    [2, 'Utara'],
-    [3, 'Timur'],
+    [1, 'Lawan Kiri'],
+    [2, 'Rekan'],
+    [3, 'Lawan Kanan'],
   ];
   for (const [pemain, nama] of lawan) {
     assert.match(html, new RegExp(`aria-label="${nama}, ${partai.kocokan.tangan[pemain].length} kartu"`));
@@ -135,8 +135,8 @@ test('meja: panel bantuan hitung hanya tampil bila diminta, berisi sisa per angk
   const html = htmlMeja(partai, { bantuan: true });
   assert.match(html, /class="bantuan"/);
   assert.equal(hitung(html, /class="angka-sisa"/g), 7);
-  for (const nama of ['Barat', 'Utara', 'Timur']) assert.match(html, new RegExp(`<th scope="row">${nama}</th>`));
-  assert.doesNotMatch(html, /<th scope="row">Selatan/);
+  for (const nama of ['Lawan Kiri', 'Rekan', 'Lawan Kanan']) assert.match(html, new RegExp(`<th scope="row">${nama}</th>`));
+  assert.doesNotMatch(html, /<th scope="row">Anda/);
   assert.doesNotMatch(html, /undefined|NaN/);
   for (const m of html.matchAll(/<td>(\d+)%<\/td>/g)) assert.ok(Number(m[1]) >= 0 && Number(m[1]) <= 100);
 });

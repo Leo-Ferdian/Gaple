@@ -6,13 +6,13 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.30.1-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-277%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.31.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-278%20lolos-brightgreen)
 
 </div>
 
 ## Ringkasan
 
-Anda (Selatan) berpasangan dengan komputer (Utara) melawan Barat dan Timur. Satu pertandingan terdiri dari beberapa partai, dan tiap partai dimainkan dalam beberapa kocokan sampai satu tim mencapai markah 100.
+Anda berpasangan dengan Rekan (komputer) melawan Lawan Kiri dan Lawan Kanan. Satu pertandingan terdiri dari beberapa partai, dan tiap partai dimainkan dalam beberapa kocokan sampai satu tim mencapai markah 100.
 
 ## Fitur
 
@@ -74,9 +74,9 @@ Diukur dengan kursi ditukar ([`docs/DEVLOG.md`](docs/DEVLOG.md) memuat rincianny
 
 | Pertandingan         | Hasil                         |
 | -------------------- | ----------------------------- |
-| Sedang melawan Mudah | menang 81,5% (400 partai)     |
-| Sulit melawan Sedang | menang 76,0% (200 partai)     |
-| Sulit melawan Mudah  | menang 90,0% (200 partai)     |
+| Sedang melawan Mudah | menang 87,5% (1.200 partai)   |
+| Sulit melawan Sedang | menang 62,0% (200 partai)     |
+| Sulit melawan Mudah  | menang 93,0% (200 partai)     |
 
 ## Arsitektur
 

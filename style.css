@@ -1167,7 +1167,7 @@ button:focus-visible {
 }
 .denah {
   display: grid;
-  grid-template-columns: 70px 78px 70px;
+  grid-template-columns: 96px 78px 96px;
   grid-template-rows: 44px 34px 44px;
   grid-template-areas:
     '. utara .'
@@ -1192,6 +1192,7 @@ button:focus-visible {
   font-family: var(--slab);
   font-size: 0.85rem;
   line-height: 1.1;
+  white-space: nowrap;
   background: rgba(0, 0, 0, 0.32);
   box-shadow: inset 0 0 0 1px var(--garis);
 }

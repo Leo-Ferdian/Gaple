@@ -24,10 +24,16 @@ import type { FungsiAcak } from './rng.ts';
 import type { LangkahAcak } from './simulasi.ts';
 import type { StateKocokan } from './tipe-kocokan.ts';
 import { buatPelacak, pandangan } from './pelacak.ts';
-import { pilihLangkahSedang } from './ai-sedang.ts';
+import { pilihLangkahSedangCepat, pilihLangkahSedang, nilaiSemuaLangkahSedang } from './ai-sedang.ts';
 
 /** Banyak dugaan pembagian per keputusan. Makin besar makin teliti dan makin lambat. */
 export const DUGAAN_BAWAAN = 60;
+
+/**
+ * Bobot penilaian Sedang yang ditambahkan ke hasil simulasi. Diukur (200 partai tiap nilai, 60 dugaan, melawan Sedang):
+ * 0 = 53% sampai 57%, 0,1 = 58,5%, 0,3 = 60%, 1 = 59%.
+ */
+export const CAMPURAN_BAWAAN = 0.3;
 
 /** Batas langkah satu simulasi; kocokan nyata paling banyak sekitar 60 langkah. */
 const BATAS_LANGKAH = 300;
@@ -41,13 +47,17 @@ export interface NilaiLangkah {
 
 export interface OpsiSulit {
   readonly dugaan?: number;
+  /** Pemain di dalam simulasi; bawaan AI Sedang cepat. */
+  readonly simulasi?: 'cepat' | 'pelacak';
+  /** Bobot nilai penilaian Sedang yang ditambahkan ke hasil simulasi (0 = murni simulasi; bawaan `CAMPURAN_BAWAAN`). */
+  readonly campuran?: number;
 }
 
 /** Memainkan kocokan sampai berakhir dengan AI Sedang di semua kursi; hasilnya selisih markah dari sudut pandang `tim`. */
-function nilaiAkhir(awal: StateKocokan, tim: 0 | 1, acak: FungsiAcak): number {
+function nilaiAkhir(awal: StateKocokan, tim: 0 | 1, acak: FungsiAcak, pemilih = pilihLangkahSedangCepat): number {
   let s = awal;
   for (let i = 0; i < BATAS_LANGKAH && akhirKocokan(s) === null; i++) {
-    const langkah = pilihLangkahSedang(s, acak);
+    const langkah = pemilih(s, acak);
     s = langkah.aksi === 'lewat' ? lewat(s, langkah.pemain) : mainkan(s, langkah.pemain, langkah.kartu, langkah.sisi);
   }
   const { tambahan } = hitungHasil(s);
@@ -59,7 +69,12 @@ function nilaiAkhir(awal: StateKocokan, tim: 0 | 1, acak: FungsiAcak): number {
  * Nilai tiap langkah legal bagi pemain yang sedang giliran, dari yang terbaik. Kosong bila harus lewat.
  * Dipakai AI Sulit dan fitur Saran di mode latihan.
  */
-export function nilaiLangkahSulit(state: StateKocokan, acak: FungsiAcak, { dugaan = DUGAAN_BAWAAN }: OpsiSulit = {}): NilaiLangkah[] {
+export function nilaiLangkahSulit(
+  state: StateKocokan,
+  acak: FungsiAcak,
+  { dugaan = DUGAAN_BAWAAN, simulasi = 'cepat', campuran = CAMPURAN_BAWAAN }: OpsiSulit = {},
+): NilaiLangkah[] {
+  const pemilih = simulasi === 'pelacak' ? pilihLangkahSedang : pilihLangkahSedangCepat;
   const pemain: NomorPemain = state.giliran;
   const pilihan = kartuLegalPemain(state, pemain).flatMap((p) => p.sisi.map((sisi) => ({ kartu: p.kartu, sisi })));
   if (pilihan.length === 0) return [];
@@ -73,10 +88,16 @@ export function nilaiLangkahSulit(state: StateKocokan, acak: FungsiAcak, { dugaa
     const dugaanState: StateKocokan = { ...state, tangan };
     pilihan.forEach((p, i) => {
       const sesudah = mainkan(dugaanState, pemain, p.kartu, p.sisi);
-      jumlah[i] = (jumlah[i] ?? 0) + nilaiAkhir(sesudah, tim, acak);
+      jumlah[i] = (jumlah[i] ?? 0) + nilaiAkhir(sesudah, tim, acak, pemilih);
     });
   }
-  return pilihan.map((p, i) => ({ ...p, nilai: (jumlah[i] ?? 0) / dugaan })).sort((a, b) => b.nilai - a.nilai);
+  const prior = campuran === 0 ? [] : nilaiSemuaLangkahSedang(state);
+  return pilihan
+    .map((p, i) => {
+      const tambahan = prior.find((q) => q.kartu.id === p.kartu.id && q.sisi === p.sisi)?.nilai ?? 0;
+      return { ...p, nilai: (jumlah[i] ?? 0) / dugaan + campuran * tambahan };
+    })
+    .sort((a, b) => b.nilai - a.nilai);
 }
 
 /** Memilih langkah untuk pemain yang sedang giliran. Lewat bila tidak ada kartu legal. */

@@ -11,6 +11,18 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-03 | Nama pemain netral dan AI yang lebih cerdas
+
+- **Tujuan:** (1) nama Utara, Barat, Timur terkesan sementara; (2) AI lebih kuat dan lebih kerja sama sebagai tim.
+- **Dikerjakan:** (1) Nama tampil kini netral: Anda, Rekan (kursi 2), Lawan Kiri (1), Lawan Kanan (3). Kursi tetap bernomor dan kelas CSS tetap berarah mata angin; hanya `NAMA_PEMAIN`, denah menu, aturan singkat, dan dokumen yang berubah. (2) Sedang: suku baru peluang lawan harus lewat (pelacak). Diukur 1.200 partai kursi ditukar: bobot 10 sampai 80 semuanya 62% sampai 65% lawan Sedang lama; dipakai 20. Suku "rekan jangan lewat" dicoba dan justru melemahkan (32% sampai 50%), jadi dibuang. (3) Sulit: simulasi tetap memakai Sedang cepat (tanpa pelacak, 22 ms per langkah); memakai Sedang dengan pelacak di simulasi tidak lebih baik (53%) dan 3 kali lebih lambat. Ditambah campuran penilaian Sedang (bobot 0,3: 60%, 0,1: 58,5%, 1: 59%, tanpa campuran: 53% sampai 57%).
+- **Hasil akhir:** Sedang lawan Mudah 87,5% (1.200 partai, dulu 81,5%); Sedang lawan Sedang lama 66,6% (1.200); Sulit lawan Sedang baru 62,0% dan lawan Mudah 93,0% (200 partai).
+- **Keputusan:** Sedang menjadi lebih kuat, jadi jarak ke Sulit mengecil (dulu 76%, kini 62%). Nama kursi tidak diubah di kode agar riwayat dan tes tetap jelas. Tes "Sulit lebih kuat dari Sedang" diganti "Sulit lebih kuat dari Mudah" karena selisih 62% terlalu berisik untuk 40 partai; pengukuran Sulit lawan Sedang ada di `npm run demo:sulit`. Tes pelacak "tukar tangan" kini mengocok kartu lawan dengan jumlah kartu tetap (jumlah kartu memang kelihatan di meja).
+- **Belum:** Sulit belum memodelkan skor partai dan petunjuk dari pilihan langkah lawan; belum diuji dimainkan manusia.
+- **Tes:** 1 tes baru (Sedang lawan Sedang cepat); 278 tes lolos.
+- **Berikutnya:** simpan dan lanjutkan pertandingan, statistik.
+
+---
+
 ## 2026-11-03 | Pengembangan ponsel dibatalkan
 
 - **Tujuan:** fokus ke desktop dulu; ponsel dibahas lagi bila ada pembaruan yang disetujui.

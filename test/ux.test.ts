@@ -106,7 +106,7 @@ test('pengumuman untuk pembaca layar: polos, memuat langkah terakhir dan giliran
 test('menu: denah duduk dan ringkasan pilihan; pemain baru melihat Cara bermain terbuka dan saran Latihan', () => {
   const baru = htmlMenu(PENGATURAN_BAWAAN);
   assert.match(baru, /class="denah"/);
-  assert.match(baru, /Anda di selatan, Utara mitra Anda/);
+  assert.match(baru, /Anda di bawah, Rekan di seberang Anda/);
   assert.match(baru, /<details class="aturan" open>/);
   assert.match(baru, /Baru pertama kali\?/);
   assert.match(baru, /Pertandingan · Terbaik dari 3 · Lawan Mudah/);
@@ -160,7 +160,7 @@ test('akhir kocokan: kartu sisa lawan terbuka dengan jumlah titiknya; saat berja
   for (const pemain of [1, 2, 3] as const) {
     const sisa = akhir.kocokan.tangan[pemain];
     const titik = sisa.reduce((j, k) => j + k.a + k.b, 0);
-    const nama = ['Selatan', 'Barat', 'Utara', 'Timur'][pemain];
+    const nama = ['Anda', 'Lawan Kiri', 'Rekan', 'Lawan Kanan'][pemain];
     if (sisa.length === 0) assert.match(html, new RegExp(`${nama} · habis`));
     else assert.match(html, new RegExp(`${nama} · ${sisa.length} kartu · ${titik} titik`));
   }

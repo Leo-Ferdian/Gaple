@@ -32,7 +32,8 @@ export type NomorPemain = 0 | 1 | 2 | 3;
 export type NomorTim = 0 | 1;
 
 /** Nama pemain menurut nomornya. Nomor 0 adalah pemain manusia. */
-export const NAMA_PEMAIN = ['Selatan', 'Barat', 'Utara', 'Timur'] as const;
+/** Nama yang tampil. Kursi tetap bernomor: 0 selatan (Anda), 1 barat (lawan kiri), 2 utara (rekan), 3 timur (lawan kanan). */
+export const NAMA_PEMAIN = ['Anda', 'Lawan Kiri', 'Rekan', 'Lawan Kanan'] as const;
 
 const PEMAIN_BERIKUTNYA = { 0: 1, 1: 2, 2: 3, 3: 0 } as const satisfies Record<NomorPemain, NomorPemain>;
 const TIM_PEMAIN = { 0: 0, 1: 1, 2: 0, 3: 1 } as const satisfies Record<NomorPemain, NomorTim>;

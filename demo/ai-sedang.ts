@@ -13,7 +13,7 @@ import { buatAcak } from '../src/rng.ts';
 import { mulaiPartai } from '../src/partai.ts';
 import { mainPartaiDengan, pilihLangkahAcak } from '../src/simulasi.ts';
 import type { EmpatKebijakan } from '../src/simulasi.ts';
-import { pilihLangkahSedang } from '../src/ai-sedang.ts';
+import { pilihLangkahSedang, pilihLangkahSedangCepat } from '../src/ai-sedang.ts';
 
 const jumlah = Number(process.argv[2] ?? 400);
 const benih = Number(process.argv[3] ?? 1);
@@ -44,9 +44,11 @@ function ukur(nama: string, kebijakanTim: EmpatKebijakan, kebijakanLawan: EmpatK
 }
 
 const sedang: EmpatKebijakan = [pilihLangkahSedang, pilihLangkahSedang, pilihLangkahSedang, pilihLangkahSedang];
+const sedangCepat: EmpatKebijakan = [pilihLangkahSedangCepat, pilihLangkahSedangCepat, pilihLangkahSedangCepat, pilihLangkahSedangCepat];
 const acakSemua: EmpatKebijakan = [pilihLangkahAcak, pilihLangkahAcak, pilihLangkahAcak, pilihLangkahAcak];
 
 console.log(`Mengukur ${jumlah} partai, benih ${benih}`);
 ukur('Sedang lawan Mudah', sedang, acakSemua);
 ukur('Mudah lawan Mudah (cermin, ~50%)', acakSemua, acakSemua);
 ukur('Sedang lawan Sedang (cermin, ~50%)', sedang, sedang);
+ukur('Sedang lawan Sedang cepat (tanpa pelacak)', sedang, sedangCepat);

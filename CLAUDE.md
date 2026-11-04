@@ -4,7 +4,7 @@ Petunjuk untuk asisten AI (dan pengembang) yang mengubah proyek ini. Bahasa kode
 
 ## Proyek
 
-Game gaple 2vs2 berbasis web. Satu pemain (Selatan) dan mitra komputer (Utara) melawan Barat dan Timur. Struktur: pertandingan (bo3 atau bo5) > partai (sampai markah 100) > kocokan. Peta lengkap ada di `docs/GUIDE.md`.
+Game gaple 2vs2 berbasis web. Satu pemain (Anda, kursi 0) dan Rekan komputer (kursi 2) melawan Lawan Kiri (1) dan Lawan Kanan (3). Di kode kursi tetap bernomor dan kelas CSS memakai arah mata angin (selatan, barat, utara, timur); hanya `NAMA_PEMAIN` yang tampil ke pemain. Struktur: pertandingan (bo3 atau bo5) > partai (sampai markah 100) > kocokan. Peta lengkap ada di `docs/GUIDE.md`.
 
 ## Perintah
 

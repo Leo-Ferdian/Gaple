@@ -7,7 +7,7 @@ import { mulaiPartai, bagiKocokan, lanjutkanPartai, STATUS_BERJALAN, STATUS_RING
 import type { Partai } from '../src/partai.ts';
 import { mainPartaiDengan, pilihLangkahAcak } from '../src/simulasi.ts';
 import type { EmpatKebijakan } from '../src/simulasi.ts';
-import { pilihLangkahSedang, angkaTidakDimiliki } from '../src/ai-sedang.ts';
+import { pilihLangkahSedang, pilihLangkahSedangCepat, angkaTidakDimiliki } from '../src/ai-sedang.ts';
 import { langkahOtomatis, menungguManusia, mainkanManusia, AI_TERSEDIA } from '../src/controller.ts';
 import { kartuLegalPemain } from '../src/kocokan.ts';
 import { jalankan } from '../bantu/skenario.ts';
@@ -119,6 +119,22 @@ test('AI Sedang jauh lebih kuat dari AI Mudah (kursi ditukar bergantian)', () =>
   assert.ok(menang / jumlah >= 0.65, `Sedang hanya menang ${menang}/${jumlah}`);
 });
 
+test('Sedang dengan peluang pelacak lebih kuat dari versi cepat tanpa pelacak (kursi ditukar)', () => {
+  const jumlah = 200;
+  let menang = 0;
+  for (let i = 0; i < jumlah; i++) {
+    const genap = i % 2 === 0;
+    const kebijakan: EmpatKebijakan = genap
+      ? [pilihLangkahSedang, pilihLangkahSedangCepat, pilihLangkahSedang, pilihLangkahSedangCepat]
+      : [pilihLangkahSedangCepat, pilihLangkahSedang, pilihLangkahSedangCepat, pilihLangkahSedang];
+    const partai = mainPartaiDengan(mulaiPartai([0, 0]), kebijakan, buatAcak(4242 + i));
+    if (partai.status !== 'selesai') throw new Error('partai tidak selesai');
+    if (partai.pemenang.menang === (genap ? 0 : 1)) menang++;
+  }
+  // Terukur sekitar 63% sampai 66% (1.200 partai); batas longgar.
+  assert.ok(menang / jumlah >= 0.55, `Sedang hanya menang ${menang}/${jumlah}`);
+});
+
 test('kontrol: acak melawan acak kira-kira seimbang (alat ukur tidak condong)', () => {
   let menang = 0;
   const jumlah = 300;
@@ -149,7 +165,7 @@ test('controller: tingkat sedang tersedia dan memainkan partai sampai selesai be
   assert.equal(partai.status, 'selesai');
 });
 
-test('AI Sedang hanya memakai tangan sendiri dan riwayat meja: menukar tangan pemain lain tidak mengubah pilihan', () => {
+test('AI Sedang hanya memakai tangan sendiri dan riwayat meja: mengocok ulang kartu pemain lain tidak mengubah pilihan', () => {
   let diuji = 0;
   for (let benih = 1; benih <= 40; benih++) {
     const acak = buatAcak(benih);
@@ -160,12 +176,14 @@ test('AI Sedang hanya memakai tangan sendiri dan riwayat meja: menukar tangan pe
         const saya = kocokan.giliran;
         const lain = [0, 1, 2, 3].filter((n) => n !== saya).map((n) => nomor(n));
         const t = kocokan.tangan;
-        // Tangan ketiga pemain lain diputar (jumlah kartu tiap pemain ikut bertukar, tapi pilihan harus sama).
+        // Kartu ketiga pemain lain dikocok ulang di antara mereka; jumlah kartu tiap pemain tetap (itu kelihatan di meja).
+        const kolam = lain.flatMap((n) => [...ada(t[n])]).reverse();
         const tukar = empat(
           ...[0, 1, 2, 3].map((n) => {
-            const idx = lain.indexOf(nomor(n));
-            if (idx === -1) return [...ada(t[saya])];
-            return [...ada(t[ada(lain[(idx + 1) % lain.length])])];
+            if (n === saya) return [...ada(t[saya])];
+            const ukuran = ada(t[n]).length;
+            const bagian = kolam.splice(0, ukuran);
+            return bagian;
           }),
         );
         const asli = pilihLangkahSedang(kocokan, buatAcak(benih * 1000 + i));
