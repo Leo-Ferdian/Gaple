@@ -6,6 +6,7 @@ import { BATAS_MARKAH } from '../markah.ts';
 import { svgKartu, ARAH_DATAR } from './kartu-svg.ts';
 import type { Markah } from '../markah.ts';
 import type { Pengaturan } from '../controller.ts';
+import type { Statistik, Hitungan } from '../statistik.ts';
 import type { Pertandingan } from '../pertandingan.ts';
 
 const NAMA_TIM = ['Kita', 'Lawan'] as const;
@@ -90,7 +91,37 @@ const ATURAN = [
   'Pertandingan dimenangkan tim yang lebih dulu mencapai 2 poin (terbaik dari 3) atau 3 poin (terbaik dari 5).',
 ];
 
-export function htmlMenu(pengaturan: Pengaturan): string {
+/** Isi tambahan menu: pertandingan tersimpan (satu baris keterangan) dan statistik pemain. */
+export interface TambahanMenu {
+  readonly simpanan?: string | null;
+  readonly statistik?: Statistik | null;
+}
+
+const persen = (h: Hitungan): string => (h.main === 0 ? '-' : `${Math.round((100 * h.menang) / h.main)}%`);
+const baris = (nama: string, isi: string): string => `<tr><th scope="row">${nama}</th><td>${isi}</td></tr>`;
+
+/** Statistik pemain; kosong bila belum ada permainan yang tercatat. */
+function htmlStatistik(s: Statistik): string {
+  const adaIsi = s.pertandingan.main + s.partai.main + s.kocokan.main > 0;
+  const isi = adaIsi
+    ? `<table class="tabel-statistik"><tbody>` +
+      baris('Pertandingan', `${s.pertandingan.menang} menang dari ${s.pertandingan.main} (${persen(s.pertandingan)})`) +
+      baris('Partai', `${s.partai.menang} menang dari ${s.partai.main} (${persen(s.partai)})`) +
+      baris(
+        'Kocokan',
+        `${s.kocokan.menang} menang, ${s.kocokan.kalah} kalah, ${s.kocokan.main - s.kocokan.menang - s.kocokan.kalah} seri`,
+      ) +
+      baris('Bonus tim Anda', `double ${s.bonus.double}, triplet ${s.bonus.triplet}, quartet ${s.bonus.quartet}`) +
+      baris('Menang beruntun', `${s.beruntun} sekarang, terbaik ${s.beruntunTerbaik}`) +
+      baris('Lawan Mudah', `${s.perAi.mudah.menang} dari ${s.perAi.mudah.main} (${persen(s.perAi.mudah)})`) +
+      baris('Lawan Sedang', `${s.perAi.sedang.menang} dari ${s.perAi.sedang.main} (${persen(s.perAi.sedang)})`) +
+      baris('Lawan Sulit', `${s.perAi.sulit.menang} dari ${s.perAi.sulit.main} (${persen(s.perAi.sulit)})`) +
+      `</tbody></table><button type="button" class="kecil" data-aksi="hapus-statistik">Hapus statistik</button>`
+    : `<p>Belum ada permainan yang tercatat.</p>`;
+  return `<details class="statistik"><summary>Statistik</summary>${isi}</details>`;
+}
+
+export function htmlMenu(pengaturan: Pengaturan, { simpanan = null, statistik = null }: TambahanMenu = {}): string {
   return (
     `<div class="meja layar menu">` +
     `<header class="papan-nama">` +
@@ -98,6 +129,11 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<h1>Gaple <span class="dua">2vs2</span></h1>` +
     `<p class="ket">Anda dan Rekan melawan Lawan Kiri dan Lawan Kanan.</p>` +
     `</header>` +
+    (simpanan === null
+      ? ''
+      : `<section class="lanjut-simpanan" aria-label="Pertandingan tersimpan"><p class="ket-simpanan"><strong>Pertandingan tersimpan</strong><span>${simpanan}</span></p>` +
+        `<button type="button" class="utama" data-aksi="lanjut-simpanan">Lanjutkan</button>` +
+        `<small>Memulai pertandingan baru dengan Main menghapus yang tersimpan.</small></section>`) +
     `<div class="pengaturan">` +
     `<fieldset><legend>Mode</legend><div class="ubin">${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</div></fieldset>` +
     `<fieldset><legend>Format pertandingan</legend><div class="ubin">${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</div></fieldset>` +
@@ -111,6 +147,7 @@ export function htmlMenu(pengaturan: Pengaturan): string {
     `<div class="mulai">${htmlDenah()}<div class="mulai-aksi"><p class="ringkas-pilihan">${teksRingkasPilihan(pengaturan)}</p>` +
     `<button type="button" class="utama" data-aksi="main">Main</button></div></div>` +
     (pengaturan.pernahMain ? '' : `<p class="saran-awal">Baru pertama kali? Pilih mode Latihan: ada tombol Saran dan Bantuan hitung.</p>`) +
+    (statistik === null ? '' : htmlStatistik(statistik)) +
     `<details class="aturan"${pengaturan.pernahMain ? '' : ' open'}><summary>Cara bermain</summary><ul>${ATURAN.map((a) => `<li>${a}</li>`).join('')}</ul></details>` +
     `</div>`
   );

@@ -36,7 +36,11 @@ import {
 import type { NomorPemain } from './engine.ts';
 import type { PilihanManusia, Saran } from './controller.ts';
 import { adalahFormat } from './pertandingan.ts';
+import type { Pertandingan } from './pertandingan.ts';
 import { muatPengaturan, simpanPengaturan } from './penyimpanan.ts';
+import { muatSimpanan, simpanPertandingan, hapusSimpanan, ringkasSimpanan } from './simpanan.ts';
+import type { Simpanan } from './simpanan.ts';
+import { muatStatistik, simpanStatistik, hapusStatistik, catatKocokan, catatPartai, catatPertandingan } from './statistik.ts';
 import { htmlMeja, teksPengumuman, kursiPemain } from './tampilan/meja-html.ts';
 import type { KartuBaru } from './tampilan/meja-html.ts';
 import { AREA_LUAS, AREA_SEMPIT } from './tampilan/tata-rantai.ts';
@@ -68,6 +72,12 @@ let pilihan: PilihanManusia | null = null; // kartu yang dipilih dan masih menun
 let dijeda = false;
 let saran: Saran | null = null; // saran langkah yang sedang tampil (mode Latihan)
 let pewaktu: ReturnType<typeof setTimeout> | undefined;
+// Simpan dan lanjutkan, statistik, ulang langkah (Latihan), dan transisi layar.
+let simpananMenu: Simpanan | null = muatSimpanan(penyimpanan); // pertandingan tersimpan yang ditawarkan di menu
+let idMain: string | null = null; // pengenal pertandingan yang sedang berjalan (statistik tidak menghitung ganda)
+let statistik = muatStatistik(penyimpanan);
+let riwayatUlang: { readonly kunci: string; readonly pertandingan: Pertandingan }[] = []; // keadaan sebelum tiap langkah Anda
+let layarTransisi = '';
 
 // Suara: konteks audio dibuat saat efek pertama diputar (setelah ketukan pemain).
 const suara = buatSuara(() => new AudioContext(), aplikasi.pengaturan.suara);
@@ -101,6 +111,7 @@ function bunyikan(layar: string): Kejadian {
 
   const kunci = `${nomorPartaiSaatIni()}-${partai.nomorKocokan}`;
   const { riwayat } = partai.kocokan;
+  if (riwayat.length < riwayatTerdengar) riwayatTerdengar = riwayat.length; // setelah Ulang langkah
   if (kunci !== kunciKocokan) {
     kejadian = { terbaru: null, bagi: riwayat.length === 0, lewat: null };
     if (kejadian.bagi) suara.putar('bagi');
@@ -209,27 +220,66 @@ function hitungMarkah(kunci: number, markah: readonly [number, number]): void {
   }
 }
 
+const kunciKocokanSekarang = (): string => {
+  const partai = partaiAktif(aplikasi);
+  return partai === null ? '' : `${nomorPartaiSaatIni()}-${partai.nomorKocokan}`;
+};
+
+/** Mencatat kocokan, partai, dan pertandingan yang baru selesai ke statistik (sekali saja per kejadian). */
+function catatKejadian(): void {
+  const t = aplikasi.pertandingan;
+  if (idMain === null || t === null) return;
+  const np = nomorPartaiSaatIni();
+  let baru = statistik;
+  const partai = t.partai;
+  if (partai !== null && partai.status === 'ringkasan')
+    baru = catatKocokan(baru, partai.hasilTerakhir, `${idMain}:k:${np}:${partai.nomorKocokan}`);
+  if (partai !== null && partai.status === 'selesai') baru = catatPartai(baru, partai.pemenang.menang, `${idMain}:p:${np}`);
+  if (t.juara !== null) baru = catatPertandingan(baru, t.juara, aplikasi.pengaturan.ai, `${idMain}:t`);
+  if (baru !== statistik) {
+    statistik = baru;
+    simpanStatistik(penyimpanan, statistik);
+  }
+}
+
+/** Menyimpan pertandingan yang berjalan; pertandingan yang sudah ada juaranya tidak disimpan lagi. */
+function simpanSekarang(): void {
+  const t = aplikasi.pertandingan;
+  if (idMain === null || t === null) return;
+  if (t.juara !== null) hapusSimpanan(penyimpanan);
+  else simpanPertandingan(penyimpanan, { id: idMain, ai: aplikasi.pengaturan.ai, mode: aplikasi.pengaturan.mode, pertandingan: t });
+}
+
 function gambar(): void {
   clearTimeout(pewaktu);
   document.documentElement.dataset.tema = aplikasi.pengaturan.tema;
   document.documentElement.dataset.animasi = aplikasi.pengaturan.animasi;
   const layar = layarAktif(aplikasi);
   const { pertandingan } = aplikasi;
+  const layarBerubah = layar !== layarTransisi;
+  layarTransisi = layar;
   const kejadian = bunyikan(layar);
   const fokus = pemilihFokus();
   const aturanTerbuka = app.querySelector('details.aturan');
   const bukaAturan = aturanTerbuka instanceof HTMLDetailsElement ? aturanTerbuka.open : null;
 
   if (layar === 'menu' || pertandingan === null) {
-    app.innerHTML = htmlMenu(aplikasi.pengaturan);
+    app.innerHTML = htmlMenu(aplikasi.pengaturan, {
+      simpanan: simpananMenu === null ? null : ringkasSimpanan(simpananMenu),
+      statistik,
+    });
     umumkan('');
     const aturan = app.querySelector('details.aturan');
     if (bukaAturan !== null && aturan instanceof HTMLDetailsElement) aturan.open = bukaAturan;
   } else if (layar === 'akhir') {
     app.innerHTML = htmlAkhir(pertandingan);
+    catatKejadian();
+    simpanSekarang();
     umumkan(pertandingan.juara === 0 ? 'Tim Anda juara' : 'Lawan juara');
   } else if (layar === 'partai-selesai') {
     app.innerHTML = htmlPartaiSelesai(pertandingan);
+    catatKejadian();
+    simpanSekarang();
     umumkan('Partai selesai');
   } else {
     const partai = partaiAktif(aplikasi);
@@ -248,7 +298,11 @@ function gambar(): void {
       lewat: kejadian.lewat,
       konfirmasi: konfirmasiKeluar,
       garis: garisBantu,
+      bisaUlang:
+        aplikasi.pengaturan.mode === 'latihan' && partai.status === 'berjalan' && riwayatUlang.at(-1)?.kunci === kunciKocokanSekarang(),
     });
+    catatKejadian();
+    simpanSekarang();
     umumkan(teksPengumuman(partai));
     zoomHalus(`${nomorPartai(aplikasi)}-${partai.nomorKocokan}`);
     hitungMarkah(nomorPartai(aplikasi), partai.markah);
@@ -265,12 +319,16 @@ function gambar(): void {
       }, tunggu);
     }
   }
+  if (layarBerubah) app.firstElementChild?.classList.add('masuk'); // transisi layar: masuk perlahan
   pulihkanFokus(fokus);
 }
 
 function mainkan(sisi: Sisi): void {
   if (pilihan === null) return;
   const idKartu = pilihan.kartu.id;
+  if (aplikasi.pengaturan.mode === 'latihan' && aplikasi.pertandingan !== null) {
+    riwayatUlang = [...riwayatUlang, { kunci: kunciKocokanSekarang(), pertandingan: aplikasi.pertandingan }].slice(-20);
+  }
   aplikasi = ubahPartaiAktif(aplikasi, (p) => mainkanManusia(p, idKartu, sisi));
   pilihan = null;
   saran = null;
@@ -279,6 +337,10 @@ function mainkan(sisi: Sisi): void {
 
 function mulai(): void {
   aplikasi = mulaiPermainan(aplikasi, acak);
+  idMain = String(Date.now());
+  riwayatUlang = [];
+  hapusSimpanan(penyimpanan);
+  simpananMenu = null;
   simpanPengaturan(penyimpanan, aplikasi.pengaturan);
   pilihan = null;
   saran = null;
@@ -289,8 +351,37 @@ function mulai(): void {
   gambar();
 }
 
+/** Melanjutkan pertandingan tersimpan; bila gagal digambar (data tak cocok), simpanan dibuang. */
+function lanjutSimpanan(): void {
+  const s = simpananMenu;
+  if (s === null) return;
+  const sebelum = aplikasi;
+  aplikasi = ubahPengaturan({ ...aplikasi, pertandingan: s.pertandingan }, { ai: s.ai, mode: s.mode });
+  simpanPengaturan(penyimpanan, aplikasi.pengaturan);
+  idMain = s.id;
+  riwayatUlang = [];
+  pilihan = null;
+  saran = null;
+  dijeda = false;
+  konfirmasiKeluar = false;
+  kunciKocokan = '';
+  statusSebelumnya = '';
+  try {
+    gambar();
+  } catch {
+    hapusSimpanan(penyimpanan);
+    simpananMenu = null;
+    aplikasi = kembaliKeMenu(sebelum);
+    idMain = null;
+    gambar();
+  }
+}
+
 function keluarKeMenu(): void {
   aplikasi = kembaliKeMenu(aplikasi);
+  simpananMenu = muatSimpanan(penyimpanan); // pertandingan yang baru ditinggalkan bisa dilanjutkan
+  idMain = null;
+  riwayatUlang = [];
   pilihan = null;
   saran = null;
   dijeda = false;
@@ -325,6 +416,21 @@ app.addEventListener('click', (e) => {
     mulai();
   } else if (aksi === 'lanjut') {
     aplikasi = lanjutkan(aplikasi, acak);
+    gambar();
+  } else if (aksi === 'lanjut-simpanan') {
+    lanjutSimpanan();
+  } else if (aksi === 'ulang') {
+    const langkah = riwayatUlang.at(-1);
+    if (langkah === undefined || langkah.kunci !== kunciKocokanSekarang()) return;
+    riwayatUlang = riwayatUlang.slice(0, -1);
+    aplikasi = { ...aplikasi, pertandingan: langkah.pertandingan };
+    pilihan = null;
+    saran = null;
+    gambar();
+  } else if (aksi === 'hapus-statistik') {
+    if (!window.confirm('Hapus semua statistik?')) return;
+    hapusStatistik(penyimpanan);
+    statistik = muatStatistik(null);
     gambar();
   } else if (aksi === 'saran') {
     const partai = partaiAktif(aplikasi);

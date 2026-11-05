@@ -12,6 +12,9 @@ function penyimpananPalsu(isi: Record<string, string> = {}) {
     setItem: (k: string, v: string): void => {
       data.set(k, v);
     },
+    removeItem: (k: string): void => {
+      data.delete(k);
+    },
     data,
   };
 }
@@ -22,6 +25,9 @@ const rusak = {
   },
   setItem() {
     throw new Error('penuh');
+  },
+  removeItem() {
+    throw new Error('dilarang');
   },
 };
 

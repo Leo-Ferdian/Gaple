@@ -172,13 +172,15 @@ function htmlBantuan(kocokan: StateKocokan): string {
 }
 
 /** Tombol Saran dan teks saran (mode Latihan). Hanya pada giliran Anda memilih kartu. */
-function htmlSaran(partai: PartaiBerjalan, saran: Saran | null, sedangMemilihSisi: boolean): string {
+function htmlSaran(partai: PartaiBerjalan, saran: Saran | null, sedangMemilihSisi: boolean, bisaUlang: boolean): string {
   const { kocokan } = partai;
-  if (kocokan.giliran !== PEMAIN_MANUSIA || kartuLegalPemain(kocokan, PEMAIN_MANUSIA).length === 0 || sedangMemilihSisi) return '';
-  if (saran === null) return `<div class="saran-baris"><button type="button" data-aksi="saran">Saran</button></div>`;
+  if (kocokan.giliran !== PEMAIN_MANUSIA || sedangMemilihSisi) return '';
+  const ulang = bisaUlang ? `<button type="button" data-aksi="ulang">Ulang langkah</button>` : '';
+  if (kartuLegalPemain(kocokan, PEMAIN_MANUSIA).length === 0) return ulang === '' ? '' : `<div class="saran-baris">${ulang}</div>`;
+  if (saran === null) return `<div class="saran-baris"><button type="button" data-aksi="saran">Saran</button>${ulang}</div>`;
   const ujung = saran.sisi === 'kiri' ? kocokan.meja.ujungKiri : saran.sisi === 'kanan' ? kocokan.meja.ujungKanan : null;
   const tempat = saran.sisi === 'awal' || ujung === null ? 'di meja' : `di sisi ${saran.sisi} (ujung ${ujung})`;
-  return `<div class="saran-baris"><p class="teks-saran" role="status">Saran: kartu ${saran.kartu.a}-${saran.kartu.b} ${tempat}</p></div>`;
+  return `<div class="saran-baris"><p class="teks-saran" role="status">Saran: kartu ${saran.kartu.a}-${saran.kartu.b} ${tempat}</p>${ulang}</div>`;
 }
 
 function htmlPilihSisi(kocokan: StateKocokan, pilihan: PilihanManusia): string {
@@ -255,6 +257,8 @@ export interface OpsiMeja {
   readonly suara?: boolean;
   /** Kartu yang baru dimainkan (animasi meluncur). */
   readonly terbaru?: KartuBaru | null;
+  /** Ada langkah Anda yang bisa diulang (mode Latihan). */
+  readonly bisaUlang?: boolean;
   /** Pemain yang baru saja lewat (balon "Lewat"). */
   readonly lewat?: NomorPemain | null;
   /** Kocokan baru saja dibagi (animasi membagi kartu). */
@@ -280,6 +284,7 @@ export function htmlMeja(
     terbaru = null,
     bagi = false,
     lewat = null,
+    bisaUlang = false,
     konfirmasi = false,
     garis = false,
   }: OpsiMeja = {},
@@ -296,7 +301,7 @@ export function htmlMeja(
     `<section class="tengah">${htmlRangkaian(kocokan, areaRangkaian, terbaru, garis, pilihan)}` +
     `<p class="status" role="status">${teksStatus(partai)}<span class="terakhir">${teksLangkahTerakhir(kocokan)}</span></p>` +
     (pilihan ? htmlPilihSisi(kocokan, pilihan) : '') +
-    (latihan && partai.status === 'berjalan' ? htmlSaran(partai, saran, pilihan !== null) : '') +
+    (latihan && partai.status === 'berjalan' ? htmlSaran(partai, saran, pilihan !== null, bisaUlang) : '') +
     (partai.status === 'ringkasan' ? htmlRingkasan(partai) : '') +
     `</section>` +
     (tampilBantuan ? htmlBantuan(kocokan) : '') +

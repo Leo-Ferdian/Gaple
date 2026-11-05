@@ -1508,3 +1508,110 @@ button:focus-visible {
   top: 100%;
   margin-top: 4px;
 }
+
+/* simpan dan lanjutkan: kartu di atas pengaturan menu */
+.lanjut-simpanan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border: 1px solid var(--aksen);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.ket-simpanan {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  text-align: left;
+  font-family: var(--slab);
+  color: var(--teks);
+}
+.ket-simpanan span {
+  color: var(--teks-redup);
+  font-size: 0.9rem;
+}
+.lanjut-simpanan small {
+  flex-basis: 100%;
+  text-align: center;
+  color: var(--teks-redup);
+}
+
+/* statistik di menu */
+.statistik {
+  max-width: 600px;
+  text-align: left;
+  color: var(--teks-redup);
+}
+.statistik summary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: var(--teks);
+  font-family: var(--slab);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.tabel-statistik {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+.tabel-statistik th,
+.tabel-statistik td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--garis);
+  text-align: left;
+}
+.tabel-statistik th {
+  font-weight: 400;
+  color: var(--teks-redup);
+  white-space: nowrap;
+}
+.tabel-statistik td {
+  color: var(--teks);
+}
+button.kecil {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--garis);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--teks-redup);
+  cursor: pointer;
+}
+button.kecil:hover {
+  color: var(--teks);
+}
+.saran-baris {
+  gap: 10px;
+}
+.saran-baris button[data-aksi='ulang'] {
+  background: linear-gradient(var(--kayu-terang), var(--kayu));
+  border-color: var(--kayu-gelap);
+  color: var(--teks);
+  font-weight: 400;
+}
+
+/* transisi layar: layar baru masuk perlahan */
+.meja.masuk {
+  animation: layar-masuk 0.38s ease-out;
+}
+@keyframes layar-masuk {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+:root[data-animasi='kurang'] .meja.masuk {
+  animation-duration: 0.15s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .meja.masuk {
+    animation: none;
+  }
+}

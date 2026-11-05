@@ -11,6 +11,18 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-05 | Simpan dan lanjutkan, statistik, ulang langkah, transisi layar
+
+- **Tujuan:** empat item pengalaman bermain: simpan dan lanjutkan pertandingan, statistik, ulang langkah di mode Latihan, transisi layar.
+- **Dikerjakan:** (1) `simpanan.ts`: pertandingan tersimpan otomatis tiap gambar ulang; menu menampilkan kartu Lanjutkan (partai, poin, markah, lawan). Data diperiksa ketat (struktur, 28 kartu unik, ujung meja, tanpa juara) dan simpanan yang tidak lolos dibuang. (2) `statistik.ts`: pertandingan, partai, kocokan (menang, kalah, seri), bonus tim Anda, menang beruntun, hasil per tingkat lawan; kunci kejadian mencegah hitung ganda saat halaman dimuat ulang; tombol Hapus statistik. (3) Ulang langkah: tombol di baris Saran (mode Latihan), mengembalikan ke sebelum langkah Anda terakhir pada kocokan yang sama. (4) Transisi layar: kelas `masuk` memberi animasi masuk pada layar baru. `bunyikan` menyelaraskan penghitung riwayat setelah Ulang langkah agar suara dan animasi langkah berikutnya tetap jalan. `Penyimpanan` mendapat `removeItem`.
+- **Keputusan:** pengacak tidak disimpan (kocokan berikutnya memakai benih baru; aturan tidak terpengaruh). Main baru menghapus simpanan; teks peringatan ada di kartu Lanjutkan. Ulang langkah mengembalikan juga langkah komputer sesudahnya karena komputer tidak bisa "dibatalkan" sendiri. Statistik hanya mencatat kocokan yang selesai, jadi Ulang langkah tidak memengaruhi statistik. Hanya mode Latihan menyimpan riwayat ulang.
+- **Diuji di browser (Playwright):** keluar ke menu, muat ulang halaman, lanjutkan; ulang langkah menambah kartu tangan; satu pertandingan penuh tercatat di statistik (1 pertandingan, 2 partai, 11 kocokan) dan simpanan terhapus saat ada juara; tanpa galat halaman.
+- **Tes:** 14 tes baru (simpan-muat di semua status partai, penolakan data rusak, statistik, tampilan menu dan tombol Ulang); 291 tes lolos.
+- **Belum:** tidak ada tombol papan ketik untuk Ulang langkah; simpanan satu slot saja.
+- **Berikutnya:** transisi keluar layar bila diminta, atau fitur lain.
+
+---
+
 ## 2026-11-03 | Nama pemain netral dan AI yang lebih cerdas
 
 - **Tujuan:** (1) nama Utara, Barat, Timur terkesan sementara; (2) AI lebih kuat dan lebih kerja sama sebagai tim.

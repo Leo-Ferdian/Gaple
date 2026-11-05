@@ -12,6 +12,7 @@ import type { Pengaturan } from './controller.ts';
 export interface Penyimpanan {
   getItem(kunci: string): string | null;
   setItem(kunci: string, nilai: string): void;
+  removeItem(kunci: string): void;
 }
 
 export const KUNCI_PENGATURAN = 'gaple:pengaturan:v1';

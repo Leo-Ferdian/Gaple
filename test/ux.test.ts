@@ -8,6 +8,7 @@ import { aplikasiBaru, mulaiPermainan, PENGATURAN_BAWAAN, rapikanPengaturan, TEM
 import { AREA_LUAS, tataRantai, indeksAnchor } from '../src/tampilan/tata-rantai.ts';
 import { pilihanKartu, jedaBerpikir } from '../src/controller.ts';
 import { kartuLegalPemain } from '../src/kocokan.ts';
+import { statistikBaru, catatPertandingan } from '../src/statistik.ts';
 import { hitungBayangan } from '../src/tampilan/bayangan.ts';
 import { kartuLegal, letakkan } from '../src/meja.ts';
 import { htmlMeja, teksPengumuman, kursiPemain } from '../src/tampilan/meja-html.ts';
@@ -242,4 +243,40 @@ test('jeda berpikir: nol tetap nol, lewat dan satu kartu lebih cepat dari banyak
   assert.ok(rata((n) => n <= 1) < rata((n) => n >= 3), 'sedikit pilihan harus lebih cepat');
   const sama = partaiBerjalan(7, 9);
   assert.equal(jedaBerpikir(sama, 700), jedaBerpikir(sama, 700));
+});
+
+test('menu: tombol Lanjutkan hanya bila ada pertandingan tersimpan; statistik kosong dan terisi', () => {
+  assert.doesNotMatch(htmlMenu(PENGATURAN_BAWAAN), /lanjut-simpanan|class="statistik"/);
+  const dengan = htmlMenu(PENGATURAN_BAWAAN, { simpanan: 'Partai 2 · poin 1-0' });
+  assert.match(dengan, /data-aksi="lanjut-simpanan"/);
+  assert.match(dengan, /Partai 2 · poin 1-0/);
+  assert.match(dengan, /menghapus yang tersimpan/);
+  const kosong = htmlMenu(PENGATURAN_BAWAAN, { statistik: statistikBaru() });
+  assert.match(kosong, /Belum ada permainan yang tercatat/);
+  assert.doesNotMatch(kosong, /hapus-statistik/);
+  let s = catatPertandingan(statistikBaru(), 0, 'sulit', 'a');
+  s = catatPertandingan(s, 1, 'sulit', 'b');
+  const isi = htmlMenu(PENGATURAN_BAWAAN, { statistik: s });
+  assert.match(isi, /1 menang dari 2 \(50%\)/);
+  assert.match(isi, /Lawan Sulit<\/th><td>1 dari 2 \(50%\)/);
+  assert.match(isi, /data-aksi="hapus-statistik"/);
+});
+
+test('Ulang langkah: tombol hanya muncul bila diminta, pada giliran Anda', () => {
+  let diuji = 0;
+  for (let benih = 1; benih <= 40 && diuji < 3; benih++) {
+    const partai = partaiBerjalan(benih, 7);
+    if (partai.kocokan.giliran !== 0 || kartuLegal(partai.kocokan.tangan[0], partai.kocokan.meja).length === 0) continue;
+    assert.doesNotMatch(htmlMeja(partai, { latihan: true }), /data-aksi="ulang"/);
+    assert.match(htmlMeja(partai, { latihan: true, bisaUlang: true }), /data-aksi="ulang">Ulang langkah</);
+    diuji++;
+  }
+  assert.ok(diuji > 0, 'tidak menemukan giliran Anda');
+  // Bukan giliran Anda: tidak ada tombol.
+  for (let benih = 1; benih <= 40; benih++) {
+    const partai = partaiBerjalan(benih, 7);
+    if (partai.kocokan.giliran === 0) continue;
+    assert.doesNotMatch(htmlMeja(partai, { latihan: true, bisaUlang: true }), /data-aksi="ulang"/);
+    return;
+  }
 });

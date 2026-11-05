@@ -58,6 +58,8 @@ gaple/
     ai-sulit.ts   pemain komputer tingkat Sulit
     controller.ts jembatan mesin dan tampilan: giliran manusia, langkah komputer
     penyimpanan.ts simpan dan muat pengaturan (localStorage)
+    simpanan.ts    simpan dan lanjutkan pertandingan yang berjalan
+    statistik.ts   statistik pemain (rekor, per tingkat AI)
     suara.ts       efek suara sintetis (WebAudio, konteks dioper dari luar)
     main.ts       titik masuk browser
     tampilan/
@@ -423,6 +425,20 @@ Pemain manusia selalu Selatan (0); tiga lainnya komputer yang bermain acak (AI M
 ### `src/penyimpanan.ts`
 
 `muatPengaturan(storage)` dan `simpanPengaturan(storage, pengaturan)`. `storage` dioper dari luar (di browser `localStorage`, di tes penyimpanan palsu). Kunci: `gaple:pengaturan:v1`. Data kosong, rusak, atau ditolak browser menghasilkan pengaturan bawaan; `simpanPengaturan` mengembalikan `false` bila ditolak dan game tetap jalan.
+
+`Penyimpanan` kini punya `removeItem` (untuk menghapus simpanan dan statistik).
+
+### `src/simpanan.ts` (simpan dan lanjutkan)
+
+`simpanPertandingan(storage, {id, ai, mode, pertandingan})`, `muatSimpanan(storage)`, `hapusSimpanan(storage)`, `ringkasSimpanan(simpanan)`. Kunci `gaple:simpanan:v1`, `VERSI_SIMPANAN` = 1 (naikkan bila bentuk state pertandingan berubah). Yang disimpan adalah state pertandingan apa adanya, ditambah tingkat AI, mode, dan `id` pertandingan. Pengacak tidak disimpan; kocokan sesudah dilanjutkan memakai benih baru. Data dari penyimpanan diperiksa `adalahPertandingan` (struktur, 28 kartu unik, ujung meja cocok dengan rangkaian, tanpa juara); yang tidak lolos menghasilkan `null`, dan `main.ts` juga membuang simpanan bila menggambarnya gagal. `main.ts` menyimpan di setiap `gambar()` pada layar meja dan partai-selesai, menghapus saat ada juara atau Main baru, dan menawarkan tombol Lanjutkan di menu.
+
+### `src/statistik.ts`
+
+`statistikBaru`, `catatKocokan`, `catatPartai`, `catatPertandingan` (murni), `rapikanStatistik`, `muatStatistik`, `simpanStatistik`, `hapusStatistik`. Kunci `gaple:statistik:v1`. Tiap kejadian punya kunci (`id:k:partai:kocokan`, `id:p:partai`, `id:t`) dan `dicatat` mengingat 8 kunci terakhir sehingga memuat ulang halaman tidak menghitung ganda. Kocokan menang bila lawan kena markah; bonus dihitung hanya bila Anda atau Rekan menutup.
+
+**Ulang langkah (Latihan):** `main.ts` menyimpan keadaan pertandingan sebelum tiap langkah Anda (paling banyak 20, hanya mode Latihan); tombol Ulang langkah mengembalikan keadaan terakhir pada kocokan yang sama, sehingga langkah komputer sesudahnya ikut terulang. Tidak berlaku setelah kocokan berakhir.
+
+**Transisi layar:** `gambar()` memberi kelas `masuk` pada layar yang baru muncul (menu, meja, partai selesai, akhir); animasi CSS `layar-masuk`, lebih singkat pada animasi Kurang, mati pada animasi Mati.
 
 ### `src/main.ts` (satu-satunya yang menyentuh halaman)
 

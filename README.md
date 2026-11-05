@@ -6,7 +6,7 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.31.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-278%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.32.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-291%20lolos-brightgreen)
 
 </div>
 
@@ -24,6 +24,10 @@ Anda berpasangan dengan Rekan (komputer) melawan Lawan Kiri dan Lawan Kanan. Sat
 - **Terasa hidup:** kartu meluncur dari kursi pemain, kartu dibagi satu per satu, penanda giliran, +markah dan cap bonus, kontrol papan ketik (Tab, Enter, panah, Esc, P). Kartu sisa lawan terbuka di akhir kocokan, zoom halus saat rantai mengecil, pratinjau bayangan di dua ujung saat memilih sisi, papan skor berhitung, ketukan kartu, balon Lewat, dan jeda berpikir komputer yang menyesuaikan jumlah pilihan. Tingkat animasi Penuh, Kurang, atau Mati di menu; otomatis mati bila sistem meminta gerak dikurangi.
 - **Tampilan warung malam:** meja beludru di bingkai kayu, papan skor kapur, dan efek suara sintetis (bisa dimatikan).
 - **Tema warna:** Hijau, Biru, Anggur, dan Kontras tinggi.
+- **Simpan dan lanjutkan:** pertandingan yang berjalan tersimpan otomatis di peramban; menu menawarkan tombol Lanjutkan (data rusak atau versi lama dibuang).
+- **Statistik:** pertandingan, partai, kocokan, bonus, menang beruntun, dan hasil per tingkat lawan; bisa dihapus dari menu.
+- **Ulang langkah** (mode Latihan): kembali ke sebelum langkah Anda terakhir.
+- **Transisi layar:** layar baru masuk perlahan.
 - **Pengaturan tersimpan** di peramban.
 
 ## Aturan singkat
