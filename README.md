@@ -6,7 +6,7 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.32.1-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-292%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.32.2-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-292%20lolos-brightgreen)
 
 </div>
 

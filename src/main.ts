@@ -319,7 +319,10 @@ function gambar(): void {
       }, tunggu);
     }
   }
-  if (layarBerubah) app.firstElementChild?.classList.add('masuk'); // transisi layar: masuk perlahan
+  if (layarBerubah) {
+    app.firstElementChild?.classList.add('masuk'); // transisi layar: masuk perlahan
+    app.querySelector('h1')?.focus({ preventScroll: true }); // pembaca layar mulai dari judul layar baru, bukan dari kekosongan
+  }
   pulihkanFokus(fokus);
 }
 

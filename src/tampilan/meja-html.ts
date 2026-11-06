@@ -295,7 +295,7 @@ export function htmlMeja(
   const tampilBantuan = (bantuan || latihan) && partai.status === 'berjalan';
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}${bagi ? ' bagi-baru' : ''}">` +
-    `<h1 class="sr-saja">Gaple 2vs2, meja permainan</h1>` +
+    `<h1 class="sr-saja" tabindex="-1">Gaple 2vs2, meja permainan</h1>` +
     htmlBar(partai, nomorPartai, dijeda, latihan, suara) +
     htmlLawan(kocokan, UTARA, 'utara', berjalan, partai.status === 'ringkasan', lewat === UTARA) +
     htmlLawan(kocokan, BARAT, 'barat', berjalan, partai.status === 'ringkasan', lewat === BARAT) +

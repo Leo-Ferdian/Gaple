@@ -11,6 +11,16 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-06 | Uji aksesibilitas dengan pohon aksesibilitas dan papan ketik
+
+- **Tujuan:** menjalankan pengujian yang tersisa dari daftar (pembaca layar dan alur rilis).
+- **Yang bisa dan tidak bisa:** pembaca layar sungguhan (NVDA, VoiceOver) tidak bisa dijalankan di lingkungan ini, jadi diuji pendekatannya: pohon aksesibilitas Playwright (`ariaSnapshot`, apa yang dibaca pembaca layar) dan permainan hanya dengan papan ketik. Alur rilis butuh repositori GitHub dan tag, yang tidak bisa didorong dari sini.
+- **Hasil:** menu terbaca benar (judul, grup radio bernama, tombol). Meja: judul, tombol Suara/Jeda/Menu, wilayah tiap pemain dengan jumlah kartu, rangkaian dengan ujung kiri dan kanan, kartu tangan bernama ("Kartu 0-1", yang tidak bisa dimainkan `disabled`). Pengumuman aria-live terbaca tiap langkah ("Anda memainkan 0-1. Giliran Lawan Kiri ..."). Lima langkah dimainkan hanya dengan Tab, Enter, dan panah. Temuan: saat layar berganti fokus hilang (ke badan halaman). Perbaikan: judul h1 tiap layar mendapat `tabindex="-1"` dan difokuskan saat layar berganti.
+- **Tes:** tes judul diperluas; 292 tes lolos.
+- **Belum:** pembaca layar sungguhan; tag rilis pertama (perlu Anda).
+
+---
+
 ## 2026-11-06 | GitHub Pages dan perbaikan aksesibilitas
 
 - **Tujuan:** game bisa dimainkan lewat tautan; pemeriksaan aksesibilitas otomatis.
