@@ -1,0 +1,40 @@
+# Menerbitkan game ke GitHub Pages supaya bisa dimainkan lewat tautan.
+# Jalan tiap push ke cabang utama (main atau master) dan bisa dijalankan manual.
+#
+# Sekali saja di repositori: Settings > Pages > Build and deployment > Source = "GitHub Actions".
+# Alamat hasilnya: https://<pengguna>.github.io/<nama-repositori>/ (build memakai base './', jadi aman di subfolder).
+name: Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  terbitkan:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run cek
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

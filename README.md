@@ -6,7 +6,7 @@
 
 Berjalan penuh di peramban. Tanpa server, tanpa akun, tanpa dependensi runtime.
 
-![versi](https://img.shields.io/badge/versi-0.32.0-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-291%20lolos-brightgreen)
+![versi](https://img.shields.io/badge/versi-0.32.1-blue) ![node](https://img.shields.io/badge/node-%3E%3D22.18-green) ![typescript](https://img.shields.io/badge/TypeScript-ketat-3178c6) ![tes](https://img.shields.io/badge/tes-292%20lolos-brightgreen)
 
 </div>
 
@@ -123,3 +123,5 @@ Jalankan `npm run cek` sebelum mengirim perubahan. CI menjalankan pemeriksaan ya
 ## Rilis
 
 Naikkan versi di `package.json`, push, lalu `git tag vX.Y.Z` dan `git push origin vX.Y.Z`. GitHub Actions menjalankan semua pemeriksaan dan membuat rilis berisi `gaple-vX.Y.Z.zip` (hasil build; sajikan lewat server statis).
+
+**Main lewat tautan (GitHub Pages):** sekali saja buka Settings > Pages > Source dan pilih "GitHub Actions". Setelah itu tiap push ke `main` atau `master` menerbitkan game ke `https://<pengguna>.github.io/<repositori>/`.

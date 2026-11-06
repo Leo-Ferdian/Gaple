@@ -280,3 +280,13 @@ test('Ulang langkah: tombol hanya muncul bila diminta, pada giliran Anda', () =>
     return;
   }
 });
+
+test('setiap layar punya tepat satu judul utama (h1) dan dialog tidak menjanjikan pertandingan hilang', () => {
+  const partai = partaiBerjalan(3, 6);
+  assert.equal(hitung(htmlMeja(partai), /<h1[ >]/g), 1);
+  assert.equal(hitung(htmlMenu(PENGATURAN_BAWAAN), /<h1[ >]/g), 1);
+  const dialog = htmlMeja(partai, { konfirmasi: true });
+  assert.match(dialog, /tersimpan dan bisa dilanjutkan/);
+  assert.doesNotMatch(dialog, /akan hilang/);
+  assert.doesNotMatch(htmlMeja(partai), /<th><\/th>/);
+});

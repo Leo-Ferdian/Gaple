@@ -163,7 +163,7 @@ function htmlBantuan(kocokan: StateKocokan): string {
       .join('');
     peluang =
       `<table class="peluang"><caption>Peluang punya kartu berangka ujung</caption>` +
-      `<thead><tr><th></th><th>${ujungKiri}</th><th>${ujungKiri === ujungKanan ? '-' : ujungKanan}</th><th>lewat</th></tr></thead><tbody>${baris}</tbody></table>`;
+      `<thead><tr><th><span class="sr-saja">Pemain</span></th><th>${ujungKiri}</th><th>${ujungKiri === ujungKanan ? '-' : ujungKanan}</th><th>lewat</th></tr></thead><tbody>${baris}</tbody></table>`;
   }
   return (
     `<section class="bantuan" aria-label="Bantuan hitung">` +
@@ -226,7 +226,7 @@ function htmlTirai(konfirmasi: boolean, dijeda: boolean): string {
   if (konfirmasi) {
     return (
       `<div class="tirai"><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="judul-dialog">` +
-      `<h2 id="judul-dialog">Keluar ke menu?</h2><p>Pertandingan yang sedang berjalan akan hilang.</p>` +
+      `<h2 id="judul-dialog">Keluar ke menu?</h2><p>Pertandingan tersimpan dan bisa dilanjutkan dari menu.</p>` +
       `<div class="tombol-baris"><button type="button" class="utama" data-aksi="batal-keluar" data-fokus>Lanjut main</button>` +
       `<button type="button" data-aksi="keluar">Keluar</button></div></div></div>`
     );
@@ -295,6 +295,7 @@ export function htmlMeja(
   const tampilBantuan = (bantuan || latihan) && partai.status === 'berjalan';
   return (
     `<div class="meja${tampilBantuan ? ' dengan-bantuan' : ''}${bagi ? ' bagi-baru' : ''}">` +
+    `<h1 class="sr-saja">Gaple 2vs2, meja permainan</h1>` +
     htmlBar(partai, nomorPartai, dijeda, latihan, suara) +
     htmlLawan(kocokan, UTARA, 'utara', berjalan, partai.status === 'ringkasan', lewat === UTARA) +
     htmlLawan(kocokan, BARAT, 'barat', berjalan, partai.status === 'ringkasan', lewat === BARAT) +

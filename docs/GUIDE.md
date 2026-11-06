@@ -602,5 +602,6 @@ Tahap dua: `hitungMarkah()` di `main.ts` menghitung naik angka markah; kartu yan
 
 - `.github/workflows/ci.yml`: tiap push dan pull request menjalankan typecheck, aturan, format, tes, build, dan gerbang.
 - `.github/workflows/release.yml`: dipicu tag `v*`. Tag harus sama dengan `version` di `package.json`. Hasilnya rilis GitHub berisi `gaple-vX.Y.Z.zip` (isi `dist`).
+- `.github/workflows/pages.yml`: dipicu push ke `main` atau `master` (dan manual). Menjalankan `npm run cek`, lalu menerbitkan `dist` ke GitHub Pages. Prasyarat sekali saja: Settings > Pages > Source = GitHub Actions. Build memakai `base: './'` sehingga jalan di subfolder alamat repositori.
 - Membuat rilis: naikkan versi, push, lalu `git tag vX.Y.Z` dan `git push origin vX.Y.Z`.
 - Build memakai `base: './'` sehingga bisa ditaruh di folder mana pun pada server statis.

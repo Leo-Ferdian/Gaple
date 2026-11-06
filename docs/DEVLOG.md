@@ -11,6 +11,16 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-06 | GitHub Pages dan perbaikan aksesibilitas
+
+- **Tujuan:** game bisa dimainkan lewat tautan; pemeriksaan aksesibilitas otomatis.
+- **Dikerjakan:** (1) `pages.yml`: push ke main atau master menjalankan `npm run cek` lalu menerbitkan `dist` ke GitHub Pages. (2) Pemeriksaan axe-core lewat Playwright pada menu (empat tema), meja (giliran Anda, dengan Saran dan Bantuan hitung), dialog jeda dan keluar, ringkasan kocokan, partai selesai, dan layar akhir: kontras aman di semua tema; dua temuan diperbaiki: layar meja, partai selesai, dan akhir tidak punya judul h1 (meja diberi h1 tersembunyi, dua layar lain h2 menjadi h1) dan sel kepala tabel peluang kosong (diberi teks tersembunyi "Pemain"). (3) Teks dialog Keluar ke menu masih berkata pertandingan akan hilang padahal sejak 0.32.0 tersimpan; diganti "Pertandingan tersimpan dan bisa dilanjutkan dari menu."
+- **Keputusan:** alur Pages memakai `npm run cek` (bukan gerbang) supaya cepat; gerbang tetap di CI. Pembaca layar sungguhan belum diuji; axe hanya menangkap sebagian masalah.
+- **Tes:** 1 tes baru (satu h1 per layar, teks dialog, kepala tabel); 292 tes lolos. Tata letak rantai juga diuji sekali dengan sekitar 2.500 kocokan acak per uji (tanpa perubahan kode): lolos.
+- **Berikutnya:** uji dengan pembaca layar sungguhan; mendorong tag pertama untuk membuktikan alur rilis.
+
+---
+
 ## 2026-11-05 | Simpan dan lanjutkan, statistik, ulang langkah, transisi layar
 
 - **Tujuan:** empat item pengalaman bermain: simpan dan lanjutkan pertandingan, statistik, ulang langkah di mode Latihan, transisi layar.

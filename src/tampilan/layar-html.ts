@@ -163,7 +163,7 @@ export function htmlPartaiSelesai(pertandingan: Pertandingan): string {
   const penentu = poinBaru[menang] >= pertandingan.target;
   return (
     `<div class="meja layar partai-selesai">` +
-    `<h2>Partai ${pertandingan.riwayatPartai.length + 1} selesai</h2>` +
+    `<h1>Partai ${pertandingan.riwayatPartai.length + 1} selesai</h1>` +
     `<p>${NAMA_TIM[partai.pemenang.kalah]} mencapai ${BATAS_MARKAH}. ${menang === 0 ? 'Anda menang partai ini.' : 'Lawan menang partai ini.'}</p>` +
     `<p>Markah akhir: Kita ${partai.markah[0]}, Lawan ${partai.markah[1]}</p>` +
     `<p class="poin">Poin: ${teksPoin(poinBaru)} (target ${pertandingan.target})</p>` +
@@ -190,7 +190,7 @@ export function htmlAkhir(pertandingan: Pertandingan): string {
   return (
     `<div class="meja layar akhir${juara === 0 ? ' menang' : ''}">` +
     (juara === 0 ? `<div class="konfeti" aria-hidden="true">${htmlKonfeti()}</div>` : '') +
-    `<h2>${juara === 0 ? 'Tim Anda juara!' : 'Lawan juara.'}</h2>` +
+    `<h1>${juara === 0 ? 'Tim Anda juara!' : 'Lawan juara.'}</h1>` +
     `<p class="poin">${teksPoin(pertandingan.poin)}</p>` +
     `<ol class="riwayat">${baris}</ol>` +
     `<div class="tombol-baris"><button type="button" class="utama" data-aksi="main-lagi">Main lagi</button>` +
