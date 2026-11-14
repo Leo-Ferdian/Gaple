@@ -3,7 +3,6 @@
 
 import { AI_TERSEDIA } from '../controller.ts';
 import { BATAS_MARKAH } from '../markah.ts';
-import { svgKartu, ARAH_DATAR } from './kartu-svg.ts';
 import type { Markah } from '../markah.ts';
 import type { Pengaturan } from '../controller.ts';
 import type { Statistik, Hitungan } from '../statistik.ts';
@@ -122,23 +121,42 @@ function htmlStatistik(s: Statistik): string {
 }
 
 export function htmlMenu(pengaturan: Pengaturan, { simpanan = null, statistik = null }: TambahanMenu = {}): string {
+  const kartu = (kelas: string, judul: string, isi: string): string =>
+    `<fieldset class="kartu-set ${kelas}"><legend>${judul}</legend><div class="ubin">${isi}</div></fieldset>`;
   return (
-    `<div class="meja layar menu">` +
-    `<header class="papan-nama">` +
-    `<div class="hias" aria-hidden="true"><span class="hias-kiri">${svgKartu(6, 6, ARAH_DATAR)}</span><span class="hias-kanan">${svgKartu(6, 3, ARAH_DATAR)}</span></div>` +
+    `<div class="meja layar menu beranda">` +
+    `<header class="judul-besar">` +
     `<h1 tabindex="-1">Gaple <span class="dua">2vs2</span></h1>` +
-    `<p class="ket">Anda dan Rekan melawan Lawan Kiri dan Lawan Kanan.</p>` +
+    `<p class="ket">Empat kursi, dua tim. Kuasai meja bersama Rekan.</p>` +
     `</header>` +
     (simpanan === null
       ? ''
       : `<section class="lanjut-simpanan" aria-label="Pertandingan tersimpan"><p class="ket-simpanan"><strong>Pertandingan tersimpan</strong><span>${simpanan}</span></p>` +
         `<button type="button" class="utama" data-aksi="lanjut-simpanan">Lanjutkan</button>` +
         `<small>Memulai pertandingan baru dengan Main menghapus yang tersimpan.</small></section>`) +
-    `<div class="pengaturan">` +
-    `<fieldset><legend>Mode</legend><div class="ubin">${radio('mode', PILIHAN_MODE, pengaturan.mode, () => true)}</div></fieldset>` +
-    `<fieldset><legend>Format pertandingan</legend><div class="ubin">${radio('format', PILIHAN_FORMAT, pengaturan.format, () => true)}</div></fieldset>` +
-    `<fieldset><legend>Lawan</legend><div class="ubin">${radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n))}</div></fieldset>` +
-    `<fieldset class="tema"><legend>Tema</legend><div class="ubin">${radio('tema', PILIHAN_TEMA, pengaturan.tema, () => true)}</div></fieldset>` +
+    `<div class="kartu-pilih">` +
+    kartu(
+      'terang',
+      'Mode',
+      radio('mode', PILIHAN_MODE, pengaturan.mode, () => true),
+    ) +
+    kartu(
+      'gelap',
+      'Format',
+      radio('format', PILIHAN_FORMAT, pengaturan.format, () => true),
+    ) +
+    kartu(
+      'terang',
+      'Lawan',
+      radio('ai', PILIHAN_AI, pengaturan.ai, (n) => AI_TERSEDIA.some((a) => a === n)),
+    ) +
+    kartu(
+      'gelap tema',
+      'Tema',
+      radio('tema', PILIHAN_TEMA, pengaturan.tema, () => true),
+    ) +
+    `</div>` +
+    `<div class="pengaturan-lain">` +
     `<fieldset><legend>Animasi</legend><div class="ubin">${radio('animasi', PILIHAN_ANIMASI, pengaturan.animasi, () => true)}</div></fieldset>` +
     `<fieldset><legend>Bantuan dan suara</legend>` +
     `<label class="pilihan"><input type="checkbox" name="bantuan"${pengaturan.bantuan ? ' checked' : ''}> Bantuan hitung <small>(kartu tersisa dan peluang kartu lawan)</small></label>` +

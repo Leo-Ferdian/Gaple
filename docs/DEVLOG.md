@@ -11,6 +11,18 @@ Catatan proses dari awal sampai proyek selesai. Entri terbaru ada di bagian atas
 
 ---
 
+## 2026-11-11 | Beranda "warung malam"
+
+- **Tujuan:** halaman depan tidak lagi terasa seperti formulir yang kaku dan generik.
+- **Dikerjakan:** `htmlMenu` ditulis ulang. Judul "GAPLE" besar dengan kartu kecil 2vs2, lampu menyorot meja kayu (latar menu memakai variabel kayu tema), empat kartu balak miring sebagai pilihan utama (Mode, Format, Lawan, Tema) dan satu baris untuk Animasi, Bantuan hitung, Efek suara. Denah duduk, ringkasan pilihan, tombol Main besar, Statistik, dan Cara bermain tetap ada. Radio tetap radio (fieldset dan legend), jadi papan ketik dan pembaca layar tidak berubah. Tema Kontras punya aturan sendiri (kartu putih dan hitam).
+- **Keputusan:** arah dipilih pengguna dari tiga sketsa (A warung malam, B rantai kartu, C dua panel) setelah rombak sebelumnya ditolak. Legend "Format pertandingan" dipendekkan menjadi "Format" agar judul kartu satu baris. Kartu miring, lurus saat disorot atau difokus (gerak sebagai jawaban atas aksi, bukan animasi berjalan sendiri). Fokus h1 tidak menampilkan garis luar karena h1 bukan kontrol.
+- **Masalah:** pada tema Kontras, teks pilihan tidak terbaca di kartu putih karena aturan lama memaksa teks putih; diperbaiki dengan `color: inherit`.
+- **Dipelajari:** menunjukkan sketsa dan meminta pilihan sebelum membangun menghindari rombak yang ditolak.
+- **Slogan:** kalimat di bawah judul diganti dari "Anda dan Rekan melawan Lawan Kiri dan Lawan Kanan." (menjelaskan, bukan mengajak, dan mengulang nama pemain yang sudah ada di denah) menjadi "Empat kursi, dua tim. Kuasai meja bersama Rekan."
+- **Berikutnya:** coba di layar nyata dan sampaikan bagian yang kurang pas.
+
+---
+
 ## 2026-11-06 | Uji aksesibilitas dengan pohon aksesibilitas dan papan ketik
 
 - **Tujuan:** menjalankan pengujian yang tersisa dari daftar (pembaca layar dan alur rilis).

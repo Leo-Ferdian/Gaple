@@ -292,3 +292,17 @@ test('setiap layar punya tepat satu judul utama (h1) dan dialog tidak menjanjika
   assert.doesNotMatch(dialog, /akan hilang/);
   assert.doesNotMatch(htmlMeja(partai), /<th><\/th>/);
 });
+
+test('beranda: empat kartu pilihan utama (mode, format, lawan, tema) dan satu baris pengaturan lain', () => {
+  const html = htmlMenu(PENGATURAN_BAWAAN);
+  assert.equal((html.match(/class="kartu-set /g) ?? []).length, 4);
+  for (const nama of ['mode', 'format', 'ai', 'tema'])
+    assert.match(
+      html,
+      new RegExp(
+        `class="kartu-set [^"]*"><legend>[^<]*</legend><div class="ubin"><label class="pilihan[^"]*"><input type="radio" name="${nama}"`,
+      ),
+    );
+  assert.match(html, /<div class="pengaturan-lain">/);
+  assert.match(html, /<h1 tabindex="-1">Gaple <span class="dua">2vs2<\/span><\/h1>/);
+});
